@@ -1,2 +1,4 @@
 build/
 pybind11/
+*.pyd
+*.pyc
