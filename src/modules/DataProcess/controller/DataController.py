@@ -4,4 +4,4 @@ class DataController:
         self.view = view
     
     def process_data(self):
-        self.model.
+        pass
