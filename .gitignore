@@ -1,4 +1,6 @@
+.vscode/
 build/
 pybind11/
+__pycache__/
 *.pyd
 *.pyc

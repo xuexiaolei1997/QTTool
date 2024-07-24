@@ -1,5 +1,6 @@
 #ifndef THREAD_POOL_H
 #define THREAD_POOL_H
+#endif // THREAD_POOL_H
 
 #include <vector>
 #include <thread>
@@ -44,4 +45,4 @@ auto ThreadPool::enqueue(F&& f, Args&&... args) -> std::future<typename std::res
     return res;
 }
 
-#endif // THREAD_POOL_H
+
