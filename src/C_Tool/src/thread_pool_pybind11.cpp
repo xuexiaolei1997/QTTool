@@ -10,5 +10,8 @@ PYBIND11_MODULE(thread_pool, m) {
         .def(py::init<size_t>())
         .def("enqueue", [](ThreadPool &pool, std::function<void()> f) {
             pool.enqueue(f);
+        })
+        .def("enqueue_with_args", [](ThreadPool &pool, std::function<F> f, std::forward<Args> args...) {
+            pool.enqueue(f, args);
         });
 }

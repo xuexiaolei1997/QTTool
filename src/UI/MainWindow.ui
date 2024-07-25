@@ -109,6 +109,18 @@
     <locale language="Chinese" country="China"/>
    </property>
   </widget>
+  <widget class="QDockWidget" name="dockWidget">
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Resource</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents"/>
+  </widget>
   <action name="actionNew">
    <property name="text">
     <string>New</string>
@@ -155,6 +167,11 @@
    </property>
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionsss">
+   <property name="text">
+    <string>sss</string>
    </property>
   </action>
  </widget>

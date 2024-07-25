@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import QMainWindow
+import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-import numpy as np
+
 from UI.UI_MainWindow import Ui_MainWindow
 from common import thread_pool
 
