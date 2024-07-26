@@ -1,0 +1,12 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>resources/icons/参数设置.png</file>
+    <file>resources/icons/二氧化碳环保.png</file>
+    <file>resources/icons/排版版面.png</file>
+    <file>resources/icons/曝光度.png</file>
+    <file>resources/icons/闪电.png</file>
+    <file>resources/icons/天气.png</file>
+    <file>resources/icons/颜色深度.png</file>
+    <file>resources/icons/照片相片.png</file>
+  </qresource>
+</RCC>

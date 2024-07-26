@@ -13,53 +13,92 @@
   <property name="windowTitle">
    <string>TOOL-X</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../pictures.qrc">
+    <normaloff>:/icons/resources/icons/排版版面.png</normaloff>:/icons/resources/icons/排版版面.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="verticalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>70</y>
-      <width>491</width>
-      <height>341</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="drawVerticalLayout"/>
-   </widget>
-   <widget class="QPushButton" name="drawButton">
-    <property name="geometry">
-     <rect>
-      <x>600</x>
-      <y>500</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true"/>
-    </property>
-    <property name="text">
-     <string>Draw</string>
-    </property>
-    <property name="default">
-     <bool>false</bool>
-    </property>
-    <property name="flat">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="ThreadButton">
-    <property name="geometry">
-     <rect>
-      <x>710</x>
-      <y>500</y>
-      <width>121</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>ThreadButton</string>
-    </property>
-   </widget>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QVBoxLayout" name="drawVerticalLayout">
+      <item>
+       <widget class="QTabWidget" name="tabWidget_workspace">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>Tab 1</string>
+         </attribute>
+         <widget class="QTabWidget" name="tabWidget">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>370</y>
+            <width>1283</width>
+            <height>391</height>
+           </rect>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="tab_3">
+           <attribute name="title">
+            <string>Tab 1</string>
+           </attribute>
+           <widget class="QPushButton" name="ThreadButton">
+            <property name="geometry">
+             <rect>
+              <x>190</x>
+              <y>230</y>
+              <width>161</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>ThreadButton</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="drawButton">
+            <property name="geometry">
+             <rect>
+              <x>120</x>
+              <y>230</y>
+              <width>51</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>Draw</string>
+            </property>
+            <property name="default">
+             <bool>false</bool>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QWidget" name="tab_4">
+           <attribute name="title">
+            <string>Tab 2</string>
+           </attribute>
+          </widget>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="tab_2">
+         <attribute name="title">
+          <string>Tab 2</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -76,6 +115,7 @@
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
+    <addaction name="actionOpen_Folder"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_as"/>
     <addaction name="actionClose"/>
@@ -92,6 +132,9 @@
     <property name="title">
      <string>View</string>
     </property>
+    <addaction name="actionResource"/>
+    <addaction name="actionDraw"/>
+    <addaction name="actionData"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -109,7 +152,13 @@
     <locale language="Chinese" country="China"/>
    </property>
   </widget>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="dockWidget_Left">
+   <property name="minimumSize">
+    <size>
+     <width>200</width>
+     <height>38</height>
+    </size>
+   </property>
    <property name="floating">
     <bool>false</bool>
    </property>
@@ -174,7 +223,64 @@
     <string>sss</string>
    </property>
   </action>
+  <action name="actionResource">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Resource</string>
+   </property>
+  </action>
+  <action name="actionDraw">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Draw</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionData">
+   <property name="text">
+    <string>Data</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+  </action>
+  <action name="actionOpen_Folder">
+   <property name="text">
+    <string>Open Folder</string>
+   </property>
+  </action>
  </widget>
- <resources/>
- <connections/>
+ <resources>
+  <include location="../pictures.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>actionResource</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>dockWidget_Left</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>91</x>
+     <y>426</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

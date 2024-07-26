@@ -11,20 +11,23 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_Dialog(object):
-    def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
-        Dialog.resize(539, 428)
-        self.verticalLayoutWidget = QtWidgets.QWidget(Dialog)
-        self.verticalLayoutWidget.setGeometry(QtCore.QRect(10, 10, 521, 411))
-        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayout_for_draw = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
-        self.verticalLayout_for_draw.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_for_draw.setObjectName("verticalLayout_for_draw")
+class Ui_DrawPaint(object):
+    def setupUi(self, DrawPaint):
+        DrawPaint.setObjectName("DrawPaint")
+        DrawPaint.resize(925, 562)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/icons/resources/icons/照片相片.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        DrawPaint.setWindowIcon(icon)
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout(DrawPaint)
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.verticalLayout_Draw = QtWidgets.QVBoxLayout()
+        self.verticalLayout_Draw.setObjectName("verticalLayout_Draw")
+        self.verticalLayout_3.addLayout(self.verticalLayout_Draw)
 
-        self.retranslateUi(Dialog)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+        self.retranslateUi(DrawPaint)
+        QtCore.QMetaObject.connectSlotsByName(DrawPaint)
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, DrawPaint):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        DrawPaint.setWindowTitle(_translate("DrawPaint", "ShowDialog"))
+import pictures_rc
