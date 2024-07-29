@@ -51,6 +51,9 @@ class MainController(Ui_MainWindow):
 
         # >> Help
         self.actionAbout.triggered.connect(self.show_about)
+
+        # Dragin
+        self.mdiArea.dragEnterEvent(self.dragInMdi)
     
     def create_file(self):
         self.create_file_window(file_path="")
@@ -95,3 +98,5 @@ class MainController(Ui_MainWindow):
     #     canvas.draw()
     #     self.show_drawed_dialog(canvas)
     
+    def dragInMdi(self):
+        pass
