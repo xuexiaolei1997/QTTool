@@ -58,6 +58,7 @@
     </property>
     <addaction name="actionResource"/>
     <addaction name="actionOperation"/>
+    <addaction name="actionDraw"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -79,11 +80,14 @@
    <property name="minimumSize">
     <size>
      <width>200</width>
-     <height>38</height>
+     <height>80</height>
     </size>
    </property>
    <property name="floating">
     <bool>false</bool>
+   </property>
+   <property name="features">
+    <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
     <string>Resource</string>
@@ -120,6 +124,68 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_Draw">
+   <property name="minimumSize">
+    <size>
+     <width>200</width>
+     <height>165</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Draw</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QTabWidget" name="tabWidget_Draw">
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="autoFillBackground">
+        <bool>true</bool>
+       </property>
+       <property name="tabPosition">
+        <enum>QTabWidget::East</enum>
+       </property>
+       <property name="tabShape">
+        <enum>QTabWidget::Rounded</enum>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="elideMode">
+        <enum>Qt::ElideNone</enum>
+       </property>
+       <property name="documentMode">
+        <bool>false</bool>
+       </property>
+       <property name="tabsClosable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="tab">
+        <attribute name="title">
+         <string>Tab 1</string>
+        </attribute>
+       </widget>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>Tab 2</string>
+        </attribute>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <action name="actionNew">
    <property name="text">
@@ -220,6 +286,17 @@
     <string>Operation</string>
    </property>
   </action>
+  <action name="actionDraw">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Draw</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../pictures.qrc"/>
@@ -227,7 +304,7 @@
  <connections>
   <connection>
    <sender>actionResource</sender>
-   <signal>toggled(bool)</signal>
+   <signal>triggered(bool)</signal>
    <receiver>dockWidget_Left</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
@@ -254,6 +331,70 @@
     <hint type="destinationlabel">
      <x>791</x>
      <y>841</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dockWidget_Left</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>actionResource</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>111</x>
+     <y>380</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dockWidget_Bottom</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>actionOperation</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>797</x>
+     <y>841</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDraw</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>dockWidget_Draw</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1483</x>
+     <y>380</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dockWidget_Draw</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>actionDraw</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1483</x>
+     <y>380</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>

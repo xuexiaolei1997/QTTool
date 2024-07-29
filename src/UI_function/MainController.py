@@ -5,7 +5,6 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from UI.UI_MainWindow import Ui_MainWindow
-from UI_function.FileEditorController import FileEditorController
 from Components.FileBrowserDock import FileBrowserDock
 from Components.TextFileEditor import TextFileEditor
 
@@ -42,9 +41,6 @@ class MainController(Ui_MainWindow):
         # >> Edit
         
         # >> View
-        # Resource
-        self.dockWidget_Left.topLevelChanged.connect(self.actionResource.isChecked)
-        self.dockWidget_Bottom.topLevelChanged.connect(self.actionOperation.isChecked)
 
         # self.showDrawController = ShowDrawController(self)  # sub window for show
         # self.actionDraw.toggled['bool'].connect(self.showDrawController.open_close)
@@ -61,6 +57,8 @@ class MainController(Ui_MainWindow):
     
     def open_file(self):
         file_path, file_type = QFileDialog.getOpenFileName(self.MainWindow, "Select File", "./")
+        if file_path == "":
+            return
         self.create_file_window(file_path)
 
     def create_file_window(self, file_path=""):
@@ -69,7 +67,7 @@ class MainController(Ui_MainWindow):
         fileEditor.show()
     
     def open_folder(self):
-        directory = QFileDialog.getExistingDirectory(self.MainWindow, "Open Folder", "/")
+        directory = QFileDialog.getExistingDirectory(self.MainWindow, "Open Folder", "./")
         self.file_browser_dock = FileBrowserDock(self.dockWidget_Left, directory)
         self.file_browser_dock.fileSelected.connect(self.create_file_window)
     

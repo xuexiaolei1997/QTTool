@@ -3,7 +3,9 @@ import chardet
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
 
-class TextFileEditor(QWidget):
+from UI.UI_FileEditor import Ui_FileEditor
+
+class TextFileEditor(Ui_FileEditor, QWidget):
     def __init__(self, file_path="") -> None:
         super().__init__()
         self.setupUi(self)
@@ -14,44 +16,6 @@ class TextFileEditor(QWidget):
         self.Button_save.clicked.connect(self.save_file)
 
         self.open_file(file_path)
-    
-    def setupUi(self, FileEditor):
-        FileEditor.setObjectName("FileEditor")
-        FileEditor.resize(725, 554)
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(FileEditor)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.verticalLayout = QtWidgets.QVBoxLayout()
-        self.verticalLayout.setObjectName("verticalLayout")
-        self.label_file_path = QtWidgets.QLabel(FileEditor)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.label_file_path.setFont(font)
-        self.label_file_path.setObjectName("label_file_path")
-        self.verticalLayout.addWidget(self.label_file_path)
-        self.textEdit_main_editor = QtWidgets.QTextEdit(FileEditor)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.textEdit_main_editor.setFont(font)
-        self.textEdit_main_editor.setObjectName("textEdit_main_editor")
-        self.verticalLayout.addWidget(self.textEdit_main_editor)
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem)
-        self.Button_save = QtWidgets.QPushButton(FileEditor)
-        self.Button_save.setObjectName("Button_save")
-        self.horizontalLayout.addWidget(self.Button_save)
-        self.verticalLayout.addLayout(self.horizontalLayout)
-        self.verticalLayout_2.addLayout(self.verticalLayout)
-
-        self.retranslateUi(FileEditor)
-        QtCore.QMetaObject.connectSlotsByName(FileEditor)
-
-    def retranslateUi(self, FileEditor):
-        _translate = QtCore.QCoreApplication.translate
-        FileEditor.setWindowTitle(_translate("FileEditor", "FileEditor"))
-        self.label_file_path.setText(_translate("FileEditor", "file_path"))
-        self.Button_save.setText(_translate("FileEditor", "Save"))
 
     def change_text(self):
         self.file_content = self.textEdit_main_editor.toPlainText()
