@@ -17,10 +17,16 @@
    <iconset resource="../pictures.qrc">
     <normaloff>:/icons/resources/icons/排版版面.png</normaloff>:/icons/resources/icons/排版版面.png</iconset>
   </property>
+  <property name="documentMode">
+   <bool>false</bool>
+  </property>
+  <property name="tabShape">
+   <enum>QTabWidget::Rounded</enum>
+  </property>
   <widget class="QWidget" name="MainWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <layout class="QVBoxLayout" name="verticalLayout_4">
     <item>
-     <widget class="QMdiArea" name="mdiArea"/>
+     <widget class="QMdiArea" name="workspace"/>
     </item>
    </layout>
   </widget>
@@ -51,6 +57,7 @@
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
+    <addaction name="actionUndo"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -295,6 +302,14 @@
    </property>
    <property name="text">
     <string>Draw</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
    </property>
   </action>
  </widget>

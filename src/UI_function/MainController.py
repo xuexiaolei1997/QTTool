@@ -10,8 +10,6 @@ from Components.TextFileEditor import TextFileEditor
 
 
 
-
-
 class MainController(Ui_MainWindow):
     def __init__(self, MainWindow) -> None:
         super().__init__()
@@ -53,7 +51,7 @@ class MainController(Ui_MainWindow):
         self.actionAbout.triggered.connect(self.show_about)
 
         # Dragin
-        self.mdiArea.dragEnterEvent(self.dragInMdi)
+        # self.mdiArea.dragEnterEvent(self.dragInMdi)
     
     def create_file(self):
         self.create_file_window(file_path="")
@@ -66,7 +64,7 @@ class MainController(Ui_MainWindow):
 
     def create_file_window(self, file_path=""):
         fileEditor = TextFileEditor(file_path)
-        self.mdiArea.addSubWindow(fileEditor)
+        self.workspace.addSubWindow(fileEditor)
         fileEditor.show()
     
     def open_folder(self):
@@ -97,6 +95,3 @@ class MainController(Ui_MainWindow):
     #     ax.legend()
     #     canvas.draw()
     #     self.show_drawed_dialog(canvas)
-    
-    def dragInMdi(self):
-        pass

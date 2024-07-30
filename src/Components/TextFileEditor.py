@@ -12,6 +12,7 @@ class TextFileEditor(Ui_FileEditor, QWidget):
         # Current file path
         self.file_path = file_path
         self.file_content = ""
+        self.now_content = ""
 
         # File size
         self.max_file_size = 4  # Unit: M
@@ -30,7 +31,7 @@ class TextFileEditor(Ui_FileEditor, QWidget):
         self.textEdit_main_editor.setText(self.file_content)
 
     def change_text(self):
-        self.file_content = self.textEdit_main_editor.toPlainText()
+        self.now_content = self.textEdit_main_editor.toPlainText()
     
     def open_file(self, file_path):
         if file_path == "":
@@ -66,21 +67,10 @@ class TextFileEditor(Ui_FileEditor, QWidget):
             if self.file_path == "":
                 return
         with open(self.file_path, 'w', encoding="utf8") as f:
-            f.write(self.file_content)
-        self.label_file_path.setText(self.file_path)
+            f.write(self.now_content)
+        self.update_file_info(self.file_path, self.file_path, self.now_content)
 
-    def close(self) -> bool:
-        if self.textEdit_main_editor.toPlainText() != self.file_content:
-            box = QMessageBox(self)
-            box.setWindowTitle("QMessageBox Demo")
-            box.setText("Are you sure you want to do this?")
-            box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-            box.buttonClicked.connect(self.handleButtonClick)
-            box.exec_()
-        return super().close()
+    def closeEvent(self, event):
+        if self.now_content != self.file_content and QMessageBox.question(self, "Save", "Save file?") == QMessageBox.yes:
+                self.save_file()
     
-    def handleButtonClick(self, button):
-        if button.text() == "Yes":
-            self.save_file()
-        elif button.text() == "No":
-            pass
