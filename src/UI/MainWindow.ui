@@ -66,6 +66,7 @@
     <addaction name="actionResource"/>
     <addaction name="actionOperation"/>
     <addaction name="actionDraw"/>
+    <addaction name="actionMusic"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -310,6 +311,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionMusic">
+   <property name="text">
+    <string>Music</string>
    </property>
   </action>
  </widget>

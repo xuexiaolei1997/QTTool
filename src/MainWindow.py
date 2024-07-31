@@ -7,7 +7,9 @@ from PyQt5.QtWidgets import *
 from common.Stack import Stack
 from Components.FileBrowserDock import FileBrowserDock
 from Components.TextFileEditor import TextFileEditor
+from Components.MusicPlayer import MusicPlayer
 from UI.UI_MainWindow import Ui_MainWindow
+
 
 class MainWindow(Ui_MainWindow, QMainWindow):
     def __init__(self) -> None:
@@ -31,6 +33,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         # >> Edit
         
         # >> View
+        self.actionMusic.triggered.connect(self.open_music_player)
 
         # >> Help
         self.actionAbout.triggered.connect(self.show_about)
@@ -57,6 +60,10 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         directory = QFileDialog.getExistingDirectory(self, "Open Folder", "./")
         self.file_browser_dock = FileBrowserDock(self.dockWidget_Left, directory)
         self.file_browser_dock.fileSelected.connect(self.create_file_window)
+    
+    def open_music_player(self):
+        music_player = MusicPlayer(self)
+        music_player.show()
     
     def close(self):
         sys.exit()
