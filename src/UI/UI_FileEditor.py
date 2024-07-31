@@ -14,17 +14,28 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_FileEditor(object):
     def setupUi(self, FileEditor):
         FileEditor.setObjectName("FileEditor")
-        FileEditor.resize(1318, 912)
+        FileEditor.resize(759, 543)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(FileEditor)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.verticalLayout.setContentsMargins(10, 10, 10, 10)
         self.verticalLayout.setObjectName("verticalLayout")
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setContentsMargins(10, 10, 10, 10)
+        self.horizontalLayout_2.setSpacing(10)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.label_file_path = QtWidgets.QLabel(FileEditor)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label_file_path.setFont(font)
         self.label_file_path.setObjectName("label_file_path")
-        self.verticalLayout.addWidget(self.label_file_path)
+        self.horizontalLayout_2.addWidget(self.label_file_path)
+        self.label_Changed = QtWidgets.QLabel(FileEditor)
+        self.label_Changed.setObjectName("label_Changed")
+        self.horizontalLayout_2.addWidget(self.label_Changed)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem)
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.textEdit_main_editor = QtWidgets.QTextEdit(FileEditor)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -33,8 +44,8 @@ class Ui_FileEditor(object):
         self.verticalLayout.addWidget(self.textEdit_main_editor)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem)
+        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem1)
         self.Button_save = QtWidgets.QPushButton(FileEditor)
         self.Button_save.setObjectName("Button_save")
         self.horizontalLayout.addWidget(self.Button_save)
@@ -42,10 +53,13 @@ class Ui_FileEditor(object):
         self.verticalLayout_2.addLayout(self.verticalLayout)
 
         self.retranslateUi(FileEditor)
+        self.textEdit_main_editor.textChanged.connect(self.label_Changed.show) # type: ignore
+        self.Button_save.clicked.connect(self.label_Changed.hide) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(FileEditor)
 
     def retranslateUi(self, FileEditor):
         _translate = QtCore.QCoreApplication.translate
         FileEditor.setWindowTitle(_translate("FileEditor", "FileEditor"))
         self.label_file_path.setText(_translate("FileEditor", "file_path"))
+        self.label_Changed.setText(_translate("FileEditor", "*"))
         self.Button_save.setText(_translate("FileEditor", "Save"))

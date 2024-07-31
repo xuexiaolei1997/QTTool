@@ -1,6 +1,6 @@
 import numpy as np
 
-from PyQt5.QtWidgets import QMessageBox, QFileDialog, QWidget, QMdiSubWindow
+from PyQt5.QtWidgets import QMessageBox, QFileDialog, QWidget, QMdiSubWindow, QMainWindow
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
@@ -10,14 +10,16 @@ from Components.TextFileEditor import TextFileEditor
 
 
 
-class MainController(Ui_MainWindow):
-    def __init__(self, MainWindow) -> None:
-        super().__init__()
+class MainWindowController(Ui_MainWindow, QMainWindow):
+    def __init__(self) -> None:
+        QMainWindow.__init__(self)
 
-        self.MainWindow = MainWindow
+        # Data
+        self.data = []
 
         # >> Setup UI
-        self.setupUi(MainWindow)
+        self.setupUi(self)
+        self.setAcceptDrops(True)
 
         # >> ThreadPool
         # self.t_pool = thread_pool.ThreadPool(4)
@@ -52,12 +54,13 @@ class MainController(Ui_MainWindow):
 
         # Dragin
         # self.mdiArea.dragEnterEvent(self.dragInMdi)
+        self.show()
     
     def create_file(self):
         self.create_file_window(file_path="")
     
     def open_file(self):
-        file_path, file_type = QFileDialog.getOpenFileName(self.MainWindow, "Select File", "./")
+        file_path, file_type = QFileDialog.getOpenFileName(self, "Select File", "./")
         if file_path == "":
             return
         self.create_file_window(file_path)
@@ -68,12 +71,12 @@ class MainController(Ui_MainWindow):
         fileEditor.show()
     
     def open_folder(self):
-        directory = QFileDialog.getExistingDirectory(self.MainWindow, "Open Folder", "./")
+        directory = QFileDialog.getExistingDirectory(self, "Open Folder", "./")
         self.file_browser_dock = FileBrowserDock(self.dockWidget_Left, directory)
         self.file_browser_dock.fileSelected.connect(self.create_file_window)
     
     def close(self):
-        self.MainWindow.close()
+        self.close()
 
     def show_about(self):
         QMessageBox.information(None, "About", "This is About!", QMessageBox.StandardButton.Close)

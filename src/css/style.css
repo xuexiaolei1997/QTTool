@@ -1,0 +1,149 @@
+QMainWindow {
+    background: #fff;
+}
+QWidget {
+    color: #000;
+}
+/* widgets */
+QPushButton, QLineEdit {
+    color: rgb(153, 170, 181);
+    background: #f3f3f3;
+}
+QLineEdit {
+    color: #000;
+}
+QLineEdit, QPushButton {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+QPushButton:hover {
+    background: ACCENT;
+    color: #fff;
+}
+QSlider::groove:horizontal {
+    height: 6px;
+    background: rgba(127, 127, 127, 0.2);
+    margin: 0 0;
+}
+QSlider::sub-page:horizontal {
+    background: ACCENT;
+    border-radius: 4px;
+}
+QSlider::handle:horizontal {
+    background: ACCENTDEEP;
+    width: 6px;
+}
+QScrollArea{
+    border:0 none;
+}
+QScrollArea { background: transparent; }
+QScrollArea > QWidget > QWidget { background: transparent; }
+QScrollArea > QWidget > QScrollBar { background: #fff; }
+QScrollBar{
+    background: transparent;
+    width: 8px;
+}
+QScrollBar::add-line, QScrollBar::sub-line {
+  background: transparent;
+}
+QScrollBar::handle {
+    background:ACCENT;
+    min-height: 20px;
+}
+QTableWidget{
+    background: #fff;
+    alternate-background-color: #fbfbfb;
+    border: 0 none;
+}
+QHeaderView::section, QHeaderView::section:last:hover {
+    background: #fff;
+}
+QHeaderView::section {
+    font-weight: bold;
+    border: 0 none;
+    border-bottom: 1px solid #e8e9ea;
+    color: #7e7e7e;
+    padding: 5px;
+    height: 25px;
+    min-width: 50px;
+}
+QHeaderView::section:hover, ::item:selected{
+    background: ACCENTMID;
+    color: #fff;
+}
+::item:hover {
+    background: ACCENT;
+    color: #fff;
+}
+/* main mode */
+.main-mode QSlider, .micro-mode QSlider{
+    margin-top:-7px;
+}
+#album-label {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+#artist-label {
+    font-size: 12px;
+    margin-bottom: 15px;
+}
+.micro-mode #artist-label {
+    font-size: 12px;
+}
+.widget-mode .buttons-widget {
+    background: #fdfdfd;
+}
+.buttons-widget QPushButton {
+    width: 24px;
+    height: 24px;
+    qproperty-iconSize: 24px;
+    border: 0 none;
+    background: transparent;
+    padding: 0;
+}
+#volume-slider {
+    max-width: 100px;
+    min-width: 100px;
+}
+/* media player */
+#media-player-menu QPushButton {
+    width: 32px;
+    height: 32px;
+    qproperty-iconSize: 32px;
+    border: 0 none;
+    border-radius: 0;
+    padding: 10px;
+}
+#media-player-menu *, #media-player-menu QPushButton{
+    background: #fafafa;
+    border-right: 1px solid #eef1f4;
+}
+#media-player-menu QPushButton:hover {
+background: #dae6ee;
+}
+.widget-mode #album-label {
+    font-size: 8px;
+    height: 10px;
+}
+.widget-mode QPushButton {
+    padding: 0 5px;
+}
+/* playing album view */
+.album-label { font-size: 24px; }
+.artist-label { font-size: 16px; }
+.media-box QLabel{
+    padding: 5px;
+}
+.media-box QLabel:hover {
+    background: ACCENT;
+    color: #fff;
+}
+.media-box QLabel.active {
+    background: ACCENTDEEP;
+    color: #fff;
+}
+#window-decorations QPushButton {
+    background: transparent;
+    border: 0 none;
+}
