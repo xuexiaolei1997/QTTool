@@ -41,10 +41,17 @@ def imageMimetypeToExt(mimetype):
     return ""
 
 
+def clearLayout(layout):
+    while layout.count():
+        child = layout.takeAt(0)
+        if child.widget():
+            child.widget().deleteLater()
+
+
 class Database:
 
     # BASE = os.path.expanduser("~/.music")
-    BASE = os.path.dirname(os.path.abspath(__file__))
+    BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings")
 
     def getPath(filename):
         return os.path.join(Database.BASE, filename)
@@ -366,9 +373,9 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
             self.populateMediaThread()
         
         self.pushButton_ChangeDir.clicked.connect(self.change_dir)
-        # self.change_dir()
     
     def change_dir(self):
+        """ Search music from directory """
         self.hide()
         self.mediaSelectionDialog = MediaLocationSelectionDialog()
         def delMediaSelection():

@@ -55,7 +55,7 @@
          </property>
          <property name="icon">
           <iconset resource="musicplayer.qrc">
-           <normaloff>:/icons/icons_musicplayer/files.svg</normaloff>:/icons/icons_musicplayer/files.svg</iconset>
+           <normaloff>:/icons/icons/files.svg</normaloff>:/icons/icons/files.svg</iconset>
          </property>
         </widget>
        </item>
@@ -129,7 +129,7 @@
            </property>
            <property name="icon">
             <iconset resource="musicplayer.qrc">
-             <normaloff>:/icons/icons_musicplayer/media-skip-backward.svg</normaloff>:/icons/icons_musicplayer/media-skip-backward.svg</iconset>
+             <normaloff>:/icons/icons/media-skip-backward.svg</normaloff>:/icons/icons/media-skip-backward.svg</iconset>
            </property>
            <property name="checkable">
             <bool>false</bool>
@@ -143,7 +143,7 @@
            </property>
            <property name="icon">
             <iconset resource="musicplayer.qrc">
-             <normaloff>:/icons/icons_musicplayer/media-playback-start.svg</normaloff>:/icons/icons_musicplayer/media-playback-start.svg</iconset>
+             <normaloff>:/icons/icons/media-playback-start.svg</normaloff>:/icons/icons/media-playback-start.svg</iconset>
            </property>
           </widget>
          </item>
@@ -154,7 +154,7 @@
            </property>
            <property name="icon">
             <iconset resource="musicplayer.qrc">
-             <normaloff>:/icons/icons_musicplayer/media-skip-forward.svg</normaloff>:/icons/icons_musicplayer/media-skip-forward.svg</iconset>
+             <normaloff>:/icons/icons/media-skip-forward.svg</normaloff>:/icons/icons/media-skip-forward.svg</iconset>
            </property>
           </widget>
          </item>
@@ -165,7 +165,7 @@
            </property>
            <property name="icon">
             <iconset resource="musicplayer.qrc">
-             <normaloff>:/icons/icons_musicplayer/media-playback-stop.svg</normaloff>:/icons/icons_musicplayer/media-playback-stop.svg</iconset>
+             <normaloff>:/icons/icons/media-playback-stop.svg</normaloff>:/icons/icons/media-playback-stop.svg</iconset>
            </property>
           </widget>
          </item>
@@ -189,7 +189,7 @@
            </property>
            <property name="icon">
             <iconset resource="musicplayer.qrc">
-             <normaloff>:/icons/icons_musicplayer/audio-volume-high.svg</normaloff>:/icons/icons_musicplayer/audio-volume-high.svg</iconset>
+             <normaloff>:/icons/icons/audio-volume-high.svg</normaloff>:/icons/icons/audio-volume-high.svg</iconset>
            </property>
           </widget>
          </item>
