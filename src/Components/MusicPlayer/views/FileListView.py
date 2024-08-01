@@ -1,13 +1,25 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from PyQt5.QtGui import QColor
 from operator import attrgetter
-from .PlayingAlbumView import PlayingAlbumView
-from .SearchView import SearchView
-from src.Application import Application
-from src.utils import dropShadow, highlightText
+
 import re
 
 FILTER_REGEX = re.compile(r'\b(artist|album|aartist)\:"((?:[^"\\]|\\.)*)"', re.IGNORECASE)
+
+
+def dropShadow():
+    effect = QGraphicsDropShadowEffect()
+    effect.setBlurRadius(15)
+    effect.setXOffset(0)
+    effect.setYOffset(3)
+    effect.setColor(QColor(0, 0, 0, 30))
+    return effect
+
+
+def highlightText(text, sub):
+    return re.sub("(%s)" % re.escape(sub), r"<b>\1</b>", text, flags=re.IGNORECASE)
+
 
 # file list view
 class FileListTableItemDelegate(QStyledItemDelegate):
@@ -21,8 +33,9 @@ class FileListTableItemDelegate(QStyledItemDelegate):
 
 class FileListTableWidget(QTableWidget):
     # https://github.com/lowbees/Hover-entire-row-of-QTableView
-    def __init__(self, rows=1, cols=7):
+    def __init__(self, parent=None, rows=1, cols=7):
         QTableView.__init__(self, rows, cols)
+        self.parent_ = parent
 
         self.setMouseTracking(True)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -33,7 +46,7 @@ class FileListTableWidget(QTableWidget):
         self.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents) # year
         self.horizontalHeader().setGraphicsEffect(dropShadow())
         self.horizontalHeader().sectionClicked.connect(self.headerClicked)
-        self.setEditTriggers(QAbstractItemView.NoEditTriggers);
+        self.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.setShowGrid(False)
         self.setItemDelegate(FileListTableItemDelegate())
 
@@ -52,7 +65,7 @@ class FileListTableWidget(QTableWidget):
     def selectPlaying(self):
         if not self.mediaRow: return
         try:
-            i, _ = next(filter(lambda i: i[1] == Application.mainWindow.mediaInfo, enumerate(self.mediaRow)))
+            i, _ = next(filter(lambda i: i[1] == self.parent_.mediaInfo, enumerate(self.mediaRow)))
             self.selectRow(i)
         except StopIteration:
             pass
@@ -112,12 +125,12 @@ class FileListTableWidget(QTableWidget):
                             if value not in media.albumArtist.lower():
                                 return False
                     return True
-                self.mediaRow = list(filter(func, Application.mainWindow.medias))
+                self.mediaRow = list(filter(func, self.parent_.medias))
             else:
                 self.specialFilter = False
-                self.mediaRow = list(filter(lambda media: self.filterText.lower() in media.title.lower(), Application.mainWindow.medias))
+                self.mediaRow = list(filter(lambda media: self.filterText.lower() in media.title.lower(), self.parent_.medias))
         else:
-            self.mediaRow = Application.mainWindow.medias
+            self.mediaRow = self.parent_.medias
 
         self.clearContents()
         self.nrows = 0
@@ -166,7 +179,7 @@ class FileListTableWidget(QTableWidget):
             e.modifiers() & Qt.ShiftModifier:
             return
         index = self.indexAt(e.pos())
-        mainWindow = Application.mainWindow
+        mainWindow = self.parent_
         if self.mediaRow:
             if mainWindow.mediaInfo and self.mediaRow[index.row()] == mainWindow.mediaInfo:
                 return
@@ -177,6 +190,7 @@ class FileListView(QWidget):
 
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
+        self.parent_ = parent
         self.initUI()
         self.bindEvents()
         self.mpos = None
@@ -187,11 +201,11 @@ class FileListView(QWidget):
         vboxLayout.setSpacing(0)
         self.setLayout(vboxLayout)
 
-        self.searchView = SearchView()
-        self.searchView.hide()
-        vboxLayout.addWidget(self.searchView)
+        # self.searchView = SearchView()
+        # self.searchView.hide()
+        # vboxLayout.addWidget(self.searchView)
 
-        self.tableWidget = tableWidget = FileListTableWidget()
+        self.tableWidget = tableWidget = FileListTableWidget(self.parent_)
         tableWidget.resizeEvent = self.tableResizeEvent
         tableWidget.setAlternatingRowColors(True)
         vboxLayout.addWidget(tableWidget, 1)
@@ -200,15 +214,15 @@ class FileListView(QWidget):
         self.scrollBar.setParent(self)
         self.scrollBar.show()
 
-        if Application.mainWindow.medias:
-            self.tableWidget.mediasAdded(Application.mainWindow.medias)
+        if self.parent_.medias:
+            self.tableWidget.mediasAdded(self.parent_.medias)
             self.tableWidget.selectPlaying()
 
     # events
     def bindEvents(self):
-        Application.mainWindow.mediasAdded.connect(self.tableWidget.mediasAdded)
-        Application.mainWindow.mediasUpdated.connect(self.tableWidget.sortAndFilter)
-        Application.mainWindow.songInfoChanged.connect(self.tableWidget.selectPlaying)
+        self.parent_.mediasAdded.connect(self.tableWidget.mediasAdded)
+        self.parent_.mediasUpdated.connect(self.tableWidget.sortAndFilter)
+        self.parent_.songInfoChanged.connect(self.tableWidget.selectPlaying)
 
     def tableResizeEvent(self, event):
         QTableWidget.resizeEvent(self.tableWidget, event)

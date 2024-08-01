@@ -33,6 +33,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         # >> Edit
         
         # >> View
+        self.music_player = None
         self.actionMusic.triggered.connect(self.open_music_player)
 
         # >> Help
@@ -62,8 +63,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.file_browser_dock.fileSelected.connect(self.create_file_window)
     
     def open_music_player(self):
-        music_player = MusicPlayer(self)
-        music_player.show()
+        if self.music_player is None:
+            self.music_player = MusicPlayer(self)
+        self.music_player.show()
     
     def close(self):
         sys.exit()

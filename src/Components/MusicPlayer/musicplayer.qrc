@@ -5,15 +5,11 @@
     <file>icons/audio-volume-muted.svg</file>
     <file>icons/files.svg</file>
     <file>icons/find.svg</file>
-    <file>icons/icon.ico</file>
     <file>icons/media-playback-pause.svg</file>
     <file>icons/media-playback-start.svg</file>
     <file>icons/media-playback-stop.svg</file>
     <file>icons/media-skip-backward.svg</file>
     <file>icons/media-skip-forward.svg</file>
     <file>icons/settings.svg</file>
-    <file>icons/window-close.svg</file>
-    <file>icons/window-maximize.svg</file>
-    <file>icons/window-minimize.svg</file>
   </qresource>
 </RCC>

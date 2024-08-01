@@ -10,8 +10,10 @@ from PyQt5.QtCore import Qt, QFileSystemWatcher, QMimeDatabase, QUrl, pyqtSignal
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtMultimedia import *
+from PyQt5.QtGui import QIcon, QPixmap
 
-from Components.MusicPlayer.UI_MusicPlayer import Ui_MusicPlayer
+from .UI_MusicPlayer import Ui_MusicPlayer
+from .views.FileListView import FileListView
 
 mimeDatabase = QMimeDatabase()
 def getFileType(f):
@@ -95,7 +97,7 @@ class Settings(object):
     # settings
     DEFAULT_SETTINGS = {
         "mediaLocation": os.path.normpath(os.path.expanduser("~/.music")),
-        "fileWatch": True,
+        "fileWatch": False,
         "redrawBackground": True,
         "disableDecorations": False,
         "darkTheme": False,
@@ -342,40 +344,90 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
             self.setProperty("class", "redraw-background")
             self.style().unpolish(self)
         
-        self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
-        self.media.durationChanged.connect(self.durationChanged)
-        self.media.volumeChanged.connect(self.volumeChanged)
-        self.media.setVolume(settings.volume)
-
-        try:
-            medias = Database.load(self.MEDIAS_FILE)
-        except:
-            medias = None
-
-        if medias:
-            self.medias = list(filter(lambda media: media.verify(), medias))
-            for mediaInfo in medias:
-                dpath = pathUp(mediaInfo.path)
-                if mediaInfo.album:
-                    if dpath not in self.albums:
-                        self.albums[dpath] = AlbumInfo(mediaInfo, False)
-                    self.albums[dpath].medias.append(mediaInfo)
-            self.sortAlbums()
-            if len(medias) != len(self.medias):
-                Database.save(self.medias, self.MEDIAS_FILE)
-            if settings.fileWatch:
-                for media in self.medias:
-                    self.fsWatcher.addPath(pathUp(media.path))
-                    self.fsWatcher.addPath(media.path)
-        elif not os.path.isdir(settings.mediaLocation):
+        # load file
+        if not os.path.isdir(settings.mediaLocation):
             self.change_dir()
         else:
             self.populateMediaThread()
         
+        self.tableView_Music = FileListView(self)
+        self.verticalLayout_tablelist.addWidget(self.tableView_Music)
+
+        self.horizontalSlider_volume.setValue(settings.volume)
+        
+        # try:
+        #     medias = Database.load(self.MEDIAS_FILE)
+        # except:
+        #     medias = None
+
+        # if medias:
+        #     self.medias = list(filter(lambda media: media.verify(), medias))
+        #     for mediaInfo in medias:
+        #         dpath = pathUp(mediaInfo.path)
+        #         if mediaInfo.album:
+        #             if dpath not in self.albums:
+        #                 self.albums[dpath] = AlbumInfo(mediaInfo, False)
+        #             self.albums[dpath].medias.append(mediaInfo)
+        #     self.sortAlbums()
+        #     if len(medias) != len(self.medias):
+        #         Database.save(self.medias, self.MEDIAS_FILE)
+        #     if settings.fileWatch:
+        #         for media in self.medias:
+        #             self.fsWatcher.addPath(pathUp(media.path))
+        #             self.fsWatcher.addPath(media.path)
+        # elif not os.path.isdir(settings.mediaLocation):
+        #     self.change_dir()
+        # else:
+        #     self.populateMediaThread()
+        
         self.pushButton_ChangeDir.clicked.connect(self.change_dir)
+
+        # Control media
+        self.media.stateChanged.connect(self.stateChanged)
+        self.media.mediaStatusChanged.connect(self.mediaStatusChanged)
+        
+        self.media.durationChanged.connect(self.mediaDurationChanged)
+        self.media.positionChanged.connect(self.mediaPositionChanged)
+        self.media.volumeChanged.connect(self.mediaVolumeChanged)
+        self.media.setVolume(settings.volume)
+        self.media.mutedChanged.connect(self.mutedChanged)
+
+        # Control songs
+        self.pushButton_pause.clicked.connect(self.playPause)
+        self.pushButton_previous.clicked.connect(self.prevSong)
+        self.pushButton_next.clicked.connect(self.nextSong)
+
+        # Control process
+        self.horizontalSlider_song_duration.valueChanged.connect(self.positionSliderChanged)
+        # Control volume
+        self.horizontalSlider_volume.valueChanged.connect(self.volumeSliderChanged)
+        self.pushButton_volume.clicked.connect(self.volumeButtonClicked)
+
+        self.media.durationChanged.connect(self.durationChanged)
     
+    def setWatchFiles(self):
+        """ Watch file and dir """
+        if settings.fileWatch:
+            self.fsWatcher = QFileSystemWatcher()
+            if self.medias:
+                for media in self.medias:
+                    self.fsWatcher.addPath(pathUp(media.path))
+                    self.fsWatcher.addPath(media.path)
+            self.fsWatcher.fileChanged.connect(self.watchFileChanged)
+            self.fsWatcher.directoryChanged.connect(self.watchDirChanged)
+        elif hasattr(self, "fsWatcher"):
+            del self.fsWatcher
+
+    def setStyles(self):
+        """ Set css """
+        stylesheet = Database.loadFile("style.css", "dark.css" if settings.darkTheme else "style.css")
+        stylesheet = stylesheet.replace("ACCENTDEEP", settings.accentDeep) \
+                      .replace("ACCENTMID", settings.accentMid)    \
+                      .replace("ACCENT", settings.accent)
+        self.setStyleSheet(stylesheet)
+
     def change_dir(self):
-        """ Search music from directory """
+        """ Change music directory """
         self.hide()
         self.mediaSelectionDialog = MediaLocationSelectionDialog()
         def delMediaSelection():
@@ -386,34 +438,49 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         self.mediaSelectionDialog.show()
 
     def populateMediaThread(self):
+        """ Search music thread """
         class ProcessMediaThread(QThread):
 
             def run(self_):
                 self.populateMedias(settings.mediaLocation)
-                Database.save(self.medias, self.MEDIAS_FILE)
+                # Database.save(self.medias, self.MEDIAS_FILE)
                 del self._thread
 
         self._thread = ProcessMediaThread()
         self._thread.start()
     
-    def mediaStatusChanged(self, status):
-        if status == QMediaPlayer.EndOfMedia:
-            self.nextSong()
+    # files
+    mediasAdded = pyqtSignal(list)
+    mediasUpdated = pyqtSignal()
+    def populateMedias(self, path):
+        """ Search music from path """
+        batch = []
+        ls = list(map(lambda f: os.path.join(path, f), os.listdir(path)))
+        if not ls: return
+        if settings.fileWatch:
+            self.fsWatcher.addPath(path)
+            self.fsWatcher.addPaths(ls)
+        for fpath in ls:
+            if os.path.isdir(fpath):
+                self.populateMedias(fpath)
+            elif os.access(fpath, os.R_OK) and getFileType(fpath) == "audio":
+                mediaInfo = MediaInfo.fromFile(fpath)
+                # dpath = pathUp(mediaInfo.path)
+                # if mediaInfo.album:
+                #     if dpath not in self.albums:
+                #         self.albums[dpath] = AlbumInfo(mediaInfo, False)
+                #     self.albums[dpath].medias.append(mediaInfo)
+                batch.append(mediaInfo)
+        # self.sortAlbums()
+        self.medias.extend(batch)
+        self.mediasAdded.emit(batch)
     
-    def durationChanged(self, duration):
-        if duration:
-            self.mediaInfo.duration = datetime.datetime.fromtimestamp(duration)
-            self.songInfoChanged.emit(self.mediaInfo)
-
-    def nextSong(self):
-        self.navigateSong(1)
-    def prevSong(self):
-        self.navigateSong(-1)
-    
+    # Current Music
     # song info
     songInfoChanged = pyqtSignal(MediaInfo)
 
     def setSong(self, info):
+        """ Set play song """
         if isinstance(info, str):
             self.setSongInfo(info)
         elif isinstance(info, MediaInfo):
@@ -421,46 +488,60 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
             self.songInfoChanged.emit(self.mediaInfo)
         mediaContent = QMediaContent(QUrl(self.mediaInfo.path))
         self.media.setMedia(mediaContent)
+
         self.media.play()
+        self.label_song_name.setText(self.mediaInfo.title)
         self.media.stateChanged.emit(self.media.state())
 
     def setSongInfo(self, path):
+        """ Set song info 2 media info """
         if path.startswith("file://"):
             self.mediaInfo = MediaInfo.fromFile(remove_file_prefix(path))
         else:
             self.mediaInfo = MediaInfo(path)
         self.songInfoChanged.emit(self.mediaInfo)
+    
+    def mediaDurationChanged(self, duration):
+        self.horizontalSlider_song_duration.setMaximum(duration)
+        self.horizontalSlider_song_duration.setPageStep(duration // 10)
+    
+    def mediaPositionChanged(self, position):
+        self.horizontalSlider_song_duration.blockSignals(True)
+        self.horizontalSlider_song_duration.setValue(position)
+        self.horizontalSlider_song_duration.blockSignals(False)
 
-    # dnd
-    def dragEnterEvent(self, e):
-        if e.mimeData().hasFormat("text/uri-list"):
-            e.accept()
-        else:
-            e.ignore()
+    def mediaVolumeChanged(self, volume):
+        self.horizontalSlider_volume.blockSignals(True)
+        self.horizontalSlider_volume.setValue(volume)
+        self.horizontalSlider_volume.blockSignals(False)
+        if volume != 0:
+            settings.volume = volume
 
-    def dropEvent(self, e):
-        if e.mimeData().hasUrls():
-            url = e.mimeData().urls()[0].url()
-            self.setSong(url)
-        elif e.mimeData().hasText():
-            text = e.mimeData().text()
-            if text.startswith("file://"):
-                self.setSong(text)
+    def durationChanged(self, duration):
+        """ Change song's play process """
+        if duration:
+            self.mediaInfo.duration = datetime.datetime.fromtimestamp(duration)
+            self.songInfoChanged.emit(self.mediaInfo)
+    
+    def volumeSliderChanged(self, volume):
+        self.media.setVolume(volume)
 
-    # album
-    albumChanged = pyqtSignal(AlbumInfo)
-    def populateAlbum(self, info): # TODO
-        if not info.path.startswith("file://"): return
-        albumPath = pathUp(info.path)
-        if albumPath in self.albums:
-            newAlbum = self.albums[albumPath]
-        else:
-            newAlbum = AlbumInfo(info)
-        if newAlbum != self.album:
-            self.album = newAlbum
-            self.albumChanged.emit(self.album)
-
+    def mediaStatusChanged(self, status):
+        """ Auto play next song """
+        if status == QMediaPlayer.EndOfMedia:
+            self.nextSong()
+    
     # controls
+    def stateChanged(self, state):
+        if state == QMediaPlayer.PlayingState:
+            pause_icon = QIcon()
+            pause_icon.addPixmap(QPixmap(":/icons/icons/media-playback-pause.svg"), QIcon.Normal, QIcon.Off)
+            self.pushButton_pause.setIcon(pause_icon)
+        else:
+            start_icon = QIcon()
+            start_icon.addPixmap(QPixmap(":/icons/icons/media-playback-start.svg"), QIcon.Normal, QIcon.Off)
+            self.pushButton_pause.setIcon(start_icon)
+
     def songIndex(self, array):
         try:
             i, _ = next(filter(lambda i: i[1] == self.mediaInfo, enumerate(array)))
@@ -474,99 +555,60 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
             self.setSong(array[idx+delta])
 
     def navigateSong(self, num):
-        if self.mode == MainWindow.FULL_MODE:
-            mode = self.centralWidget().mode
-            if mode == MediaPlayer.PLAYING_ALBUM_MODE:
-                self.nextSongArray(self.album.medias, num)
-            else:
-                self.nextSongArray(self.centralWidget().view.tableWidget.mediaRow, num)
-        elif self.album:
-            self.nextSongArray(self.album.medias, num)
+        self.nextSongArray(self.tableView_Music.tableWidget.mediaRow, num)
+    
+    # pause
+    def playPause(self):
+        """ Control play & pause """
+        if self.media.state() == QMediaPlayer.PlayingState:
+            self.media.pause()
+        else:
+            self.media.play()
 
     def nextSong(self):
         self.navigateSong(1)
+
     def prevSong(self):
         self.navigateSong(-1)
-
-
+    
     # volume
-    def volumeChanged(self, volume):
-        settings.volume = volume
-
-    # files
-    mediasAdded = pyqtSignal(list)
-    mediasUpdated = pyqtSignal()
-    def populateMedias(self, path):
-        batch = []
-        ls = list(map(lambda f: os.path.join(path, f), os.listdir(path)))
-        if not ls: return
-        if settings.fileWatch:
-            self.fsWatcher.addPath(path)
-            self.fsWatcher.addPaths(ls)
-        for fpath in ls:
-            if os.path.isdir(fpath):
-                self.populateMedias(fpath)
-            elif os.access(fpath, os.R_OK) and getFileType(fpath) == "audio":
-                mediaInfo = MediaInfo.fromFile(fpath)
-                dpath = pathUp(mediaInfo.path)
-                if mediaInfo.album:
-                    if dpath not in self.albums:
-                        self.albums[dpath] = AlbumInfo(mediaInfo, False)
-                    self.albums[dpath].medias.append(mediaInfo)
-                batch.append(mediaInfo)
-        self.sortAlbums()
-        self.medias.extend(batch)
-        self.mediasAdded.emit(batch)
+    def positionSliderChanged(self, position):
+        self.media.setPosition(position)
     
-    # albums
-    def sortAlbums(self):
-        for album in self.albums.values():
-            album.medias.sort()
+    def volumeButtonClicked(self):
+        self.media.setMuted(not self.media.isMuted())
     
-    def navigateSong(self, num):
-        if self.mode == MainWindow.FULL_MODE:
-            mode = self.centralWidget().mode
-            if mode == MediaPlayer.PLAYING_ALBUM_MODE:
-                self.nextSongArray(self.album.medias, num)
-            else:
-                self.nextSongArray(self.centralWidget().view.tableWidget.mediaRow, num)
-        elif self.album:
-            self.nextSongArray(self.album.medias, num)
+    def mutedChanged(self, muted):
+        if muted:
+            muted_icon = QIcon()
+            muted_icon.addPixmap(QPixmap(":/icons/icons/audio-volume-muted.svg"), QIcon.Normal, QIcon.Off)
+            self.pushButton_volume.setIcon(muted_icon)
+            self.horizontalSlider_volume.setValue(0)
+        else:
+            unmuted_icon = QIcon()
+            unmuted_icon.addPixmap(QPixmap(":/icons/icons/audio-volume-high.svg"), QIcon.Normal, QIcon.Off)
+            self.pushButton_volume.setIcon(unmuted_icon)
+            self.horizontalSlider_volume.setValue(settings.volume)
 
-    def setStyles(self):
-        stylesheet = Database.loadFile("style.css", "dark.css" if settings.darkTheme else "style.css")
-        stylesheet = stylesheet.replace("ACCENTDEEP", settings.accentDeep) \
-                      .replace("ACCENTMID", settings.accentMid)    \
-                      .replace("ACCENT", settings.accent)
-        self.setStyleSheet(stylesheet)
-        # if self.checkBox_DarkTheme.checkState():
-        #     self.centralWidget().backgroundLabel.setVisible(self.settings.darkTheme)
-
-    def setWatchFiles(self):
-        if settings.fileWatch:
-            self.fsWatcher = QFileSystemWatcher()
-            if self.medias:
-                for media in self.medias:
-                    self.fsWatcher.addPath(pathUp(media.path))
-                    self.fsWatcher.addPath(media.path)
-            self.fsWatcher.fileChanged.connect(self.watchFileChanged)
-            self.fsWatcher.directoryChanged.connect(self.watchDirChanged)
-        elif hasattr(self, "fsWatcher"):
-            del self.fsWatcher
-    
     def watchFileChanged(self, fpath):
         pass
 
     def watchDirChanged(self, dpath):
+        self.medias = []
         # TODO: handle directories
-        oldPaths = set(filter(lambda fpath: pathUp(fpath) == dpath,
-            map(lambda info: remove_file_prefix(info.path), self.medias)))
+        # oldPaths = set(filter(lambda fpath: pathUp(fpath) == dpath,
+        #     map(lambda info: remove_file_prefix(info.path), self.medias)))
         newPaths = set(map(lambda fpath: os.path.join(dpath, fpath),
                 filter(lambda fpath: getFileType(fpath) == "audio", os.listdir(dpath))))
 
-        fremoved = oldPaths.difference(newPaths)
-        self.medias = list(filter(lambda media: remove_file_prefix(media.path) not in fremoved, self.medias))
-        for added in newPaths.difference(oldPaths):
+        # fremoved = oldPaths.difference(newPaths)
+        # self.medias = list(filter(lambda media: remove_file_prefix(media.path) not in fremoved, self.medias))
+        # for added in newPaths.difference(oldPaths):
+        #     try:
+        #         self.medias.append(MediaInfo.fromFile(added))
+        #     except OSError:
+        #         return
+        for added in newPaths:
             try:
                 self.medias.append(MediaInfo.fromFile(added))
             except OSError:
