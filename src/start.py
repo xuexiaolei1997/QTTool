@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import QMessageBox
 from Application import Application
 
 
-
 def excepthook(exctype, value, tb):
     print("Execption:")
     print("Execption Type:", exctype)
@@ -17,6 +16,7 @@ def excepthook(exctype, value, tb):
     response = QMessageBox.warning(Application.mainWindow, "Error", repr(value), QMessageBox.Ok | QMessageBox.Close)
     if response != QMessageBox.Ok:
         sys.exit(1)
+
 
 sys.excepthook = excepthook
 
