@@ -2,7 +2,7 @@ import os
 import chardet
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
 
-from UI.UI_FileEditor import Ui_FileEditor
+from Components.TextFileEditor.UI_FileEditor import Ui_FileEditor
 
 class TextFileEditor(Ui_FileEditor, QWidget):
     def __init__(self, file_path="") -> None:

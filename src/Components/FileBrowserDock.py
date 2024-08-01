@@ -2,7 +2,6 @@ import os
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from PyQt5.QtWidgets import QFileSystemModel, QTreeView, QMenu, QAction, QDockWidget
-from Components.TextFileEditor import TextFileEditor
 
 class FileBrowserDock(QDockWidget):
 

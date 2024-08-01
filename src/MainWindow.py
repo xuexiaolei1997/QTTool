@@ -6,8 +6,8 @@ from PyQt5.QtWidgets import *
 
 from common.Stack import Stack
 from Components.FileBrowserDock import FileBrowserDock
-from Components.TextFileEditor import TextFileEditor
-from Components.MusicPlayer import MusicPlayer
+from Components.TextFileEditor.TextFileEditor import TextFileEditor
+from Components.MusicPlayer.MusicPlayer import MusicPlayer
 from UI.UI_MainWindow import Ui_MainWindow
 
 

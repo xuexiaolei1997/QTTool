@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import datetime
 from functools import total_ordering
@@ -9,8 +10,8 @@ from PyQt5.QtCore import Qt, QFileSystemWatcher, QMimeDatabase, QUrl, pyqtSignal
 from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtMultimedia import *
-from UI.UI_MusicPlayer import Ui_MusicPlayer
 
+from Components.MusicPlayer.UI_MusicPlayer import Ui_MusicPlayer
 
 mimeDatabase = QMimeDatabase()
 def getFileType(f):
@@ -19,9 +20,15 @@ def getFileType(f):
     return mime[0].name().split("/")[0]
 
 
+def remove_file_prefix(path):
+    """ Remove file:// in path """
+    path = re.sub(r"^file:\/+", "", path)
+    return path
+
+
 def pathUp(path):
     if path.startswith("file://"):
-        return os.path.normpath(os.path.join(path[8:], ".."))
+        return os.path.normpath(os.path.join(remove_file_prefix(path), ".."))
     return os.path.normpath(os.path.join(path, ".."))
 
 
@@ -36,7 +43,8 @@ def imageMimetypeToExt(mimetype):
 
 class Database:
 
-    BASE = os.path.expanduser("~/.music")
+    # BASE = os.path.expanduser("~/.music")
+    BASE = os.path.dirname(os.path.abspath(__file__))
 
     def getPath(filename):
         return os.path.join(Database.BASE, filename)
@@ -79,7 +87,7 @@ class Settings(object):
 
     # settings
     DEFAULT_SETTINGS = {
-        "mediaLocation": os.path.normpath(os.path.expanduser("./Music")),
+        "mediaLocation": os.path.normpath(os.path.expanduser("~/.music")),
         "fileWatch": True,
         "redrawBackground": True,
         "disableDecorations": False,
@@ -138,31 +146,31 @@ class MediaInfo(object):
     
     def searchImage(path, song=None):
         return None
-        if song and song.picture:
-            picture = song.picture
-            ext = imageMimetypeToExt(picture.mimetype)
-            dataHash = md5(picture.data).hexdigest()
-            fpath = os.path.join(MediaInfo.IMAGE_CACHE, dataHash + ext)
-            if os.path.isfile(fpath): return fpath
-            Database.saveFile(picture.data, dataHash + ext, "cache")
-            return fpath
+        # if song and song.picture:
+        #     picture = song.picture
+        #     ext = imageMimetypeToExt(picture.mimetype)
+        #     dataHash = md5(picture.data).hexdigest()
+        #     fpath = os.path.join(MediaInfo.IMAGE_CACHE, dataHash + ext)
+        #     if os.path.isfile(fpath): return fpath
+        #     Database.saveFile(picture.data, dataHash + ext, "cache")
+        #     return fpath
 
-        searchPath = pathUp(path)
-        paths = list(filter(lambda path: getFileType(path) == "image", os.listdir(searchPath)))
-        if paths:
-            prioritize = ["Case Cover Back Outer", "Cover.", "cover.", "CD."]
-            def find_path():
-                for path in paths:
-                    for priority in prioritize:
-                        if path.startswith(priority):
-                            return path
-                return paths[0]
-            return os.path.join(searchPath, find_path())
-        else:
-            return None
+        # searchPath = pathUp(path)
+        # paths = list(filter(lambda path: getFileType(path) == "image", os.listdir(searchPath)))
+        # if paths:
+        #     prioritize = ["Case Cover Back Outer", "Cover.", "cover.", "CD."]
+        #     def find_path():
+        #         for path in paths:
+        #             for priority in prioritize:
+        #                 if path.startswith(priority):
+        #                     return path
+        #         return paths[0]
+        #     return os.path.join(searchPath, find_path())
+        # else:
+        #     return None
 
     def verify(self):
-        if self.path.startswith("file://") and not os.path.isfile(self.path[8:]):
+        if self.path.startswith("file://") and not os.path.isfile(remove_file_prefix(self.path)):
             return False
         if self.image and not os.path.isfile(self.image):
             self.image = MediaInfo.searchImage(self.path)
@@ -336,6 +344,7 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
             medias = Database.load(self.MEDIAS_FILE)
         except:
             medias = None
+
         if medias:
             self.medias = list(filter(lambda media: media.verify(), medias))
             for mediaInfo in medias:
@@ -352,23 +361,28 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
                     self.fsWatcher.addPath(pathUp(media.path))
                     self.fsWatcher.addPath(media.path)
         elif not os.path.isdir(settings.mediaLocation):
-            self.hide()
-            self.mediaSelectionDialog = MediaLocationSelectionDialog()
-            def delMediaSelection():
-                self.show()
-                self.populateMediaThread()
-                del self.mediaSelectionDialog
-            self.mediaSelectionDialog.okButton.clicked.connect(delMediaSelection)
-            self.mediaSelectionDialog.show()
+            self.change_dir()
         else:
             self.populateMediaThread()
+        
+        self.pushButton_ChangeDir.clicked.connect(self.change_dir)
+        # self.change_dir()
     
+    def change_dir(self):
+        self.hide()
+        self.mediaSelectionDialog = MediaLocationSelectionDialog()
+        def delMediaSelection():
+            self.show()
+            self.populateMediaThread()
+            del self.mediaSelectionDialog
+        self.mediaSelectionDialog.okButton.clicked.connect(delMediaSelection)
+        self.mediaSelectionDialog.show()
+
     def populateMediaThread(self):
         class ProcessMediaThread(QThread):
 
             def run(self_):
                 self.populateMedias(settings.mediaLocation)
-                os.makedirs("./", exist_ok=True)
                 Database.save(self.medias, self.MEDIAS_FILE)
                 del self._thread
 
@@ -405,15 +419,10 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
 
     def setSongInfo(self, path):
         if path.startswith("file://"):
-            self.mediaInfo = MediaInfo.fromFile(path[8:])
+            self.mediaInfo = MediaInfo.fromFile(remove_file_prefix(path))
         else:
             self.mediaInfo = MediaInfo(path)
         self.songInfoChanged.emit(self.mediaInfo)
-
-    def durationChanged(self, duration):
-        if duration:
-            self.mediaInfo.duration = datetime.datetime.fromtimestamp(duration)
-            self.songInfoChanged.emit(self.mediaInfo)
 
     # dnd
     def dragEnterEvent(self, e):
@@ -443,10 +452,6 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         if newAlbum != self.album:
             self.album = newAlbum
             self.albumChanged.emit(self.album)
-
-    def mediaStatusChanged(self, status):
-        if status == QMediaPlayer.EndOfMedia:
-            self.nextSong()
 
     # controls
     def songIndex(self, array):
@@ -520,21 +525,15 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
                 self.nextSongArray(self.centralWidget().view.tableWidget.mediaRow, num)
         elif self.album:
             self.nextSongArray(self.album.medias, num)
-    
-    def volumeChanged(self, volume):
-        settings.volume = volume
 
     def setStyles(self):
-        stylesheet = Database.loadFile("css/style.css", "css/dark.css" if settings.darkTheme else "css/style.css")
+        stylesheet = Database.loadFile("style.css", "dark.css" if settings.darkTheme else "style.css")
         stylesheet = stylesheet.replace("ACCENTDEEP", settings.accentDeep) \
                       .replace("ACCENTMID", settings.accentMid)    \
                       .replace("ACCENT", settings.accent)
         self.setStyleSheet(stylesheet)
         # if self.checkBox_DarkTheme.checkState():
         #     self.centralWidget().backgroundLabel.setVisible(self.settings.darkTheme)
-
-    def change_dir(self):
-        pass
 
     def setWatchFiles(self):
         if settings.fileWatch:
@@ -554,12 +553,12 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
     def watchDirChanged(self, dpath):
         # TODO: handle directories
         oldPaths = set(filter(lambda fpath: pathUp(fpath) == dpath,
-            map(lambda info: info.path[8:], self.medias)))
+            map(lambda info: remove_file_prefix(info.path), self.medias)))
         newPaths = set(map(lambda fpath: os.path.join(dpath, fpath),
                 filter(lambda fpath: getFileType(fpath) == "audio", os.listdir(dpath))))
 
         fremoved = oldPaths.difference(newPaths)
-        self.medias = list(filter(lambda media: media.path[8:] not in fremoved, self.medias))
+        self.medias = list(filter(lambda media: remove_file_prefix(media.path) not in fremoved, self.medias))
         for added in newPaths.difference(oldPaths):
             try:
                 self.medias.append(MediaInfo.fromFile(added))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'd:\Desktop\QTTool\src\UI\FileEditor.ui'
+# Form implementation generated from reading ui file 'd:\Desktop\QTTool\src\Components\TextFileEditor\FileEditor.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #

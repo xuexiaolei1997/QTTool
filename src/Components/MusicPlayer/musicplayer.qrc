@@ -1,0 +1,19 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>icons_musicplayer/album.svg</file>
+    <file>icons_musicplayer/audio-volume-high.svg</file>
+    <file>icons_musicplayer/audio-volume-muted.svg</file>
+    <file>icons_musicplayer/files.svg</file>
+    <file>icons_musicplayer/find.svg</file>
+    <file>icons_musicplayer/icon.ico</file>
+    <file>icons_musicplayer/media-playback-pause.svg</file>
+    <file>icons_musicplayer/media-playback-start.svg</file>
+    <file>icons_musicplayer/media-playback-stop.svg</file>
+    <file>icons_musicplayer/media-skip-backward.svg</file>
+    <file>icons_musicplayer/media-skip-forward.svg</file>
+    <file>icons_musicplayer/settings.svg</file>
+    <file>icons_musicplayer/window-close.svg</file>
+    <file>icons_musicplayer/window-maximize.svg</file>
+    <file>icons_musicplayer/window-minimize.svg</file>
+  </qresource>
+</RCC>

@@ -6,7 +6,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from UI.UI_MainWindow import Ui_MainWindow
 from Components.FileBrowserDock import FileBrowserDock
-from Components.TextFileEditor import TextFileEditor
+from Components.TextFileEditor.TextFileEditor import TextFileEditor
 
 
 
