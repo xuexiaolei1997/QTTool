@@ -234,33 +234,6 @@ class MediaInfo(object):
         return object.__eq__(self, other)
 
 
-@total_ordering
-class AlbumInfo(object):
-
-    def __init__(self, info, populate=True):
-        self.medias = []
-        if isinstance(info, str):
-            self.title = info
-            self.path = info
-            self.artist = self.image = None
-        else:
-            self.title = info.album
-            self.path = pathUp(info.path)
-            self.artist = info.albumArtist
-            self.image = info.image
-
-            if populate:
-                for f in os.listdir(self.path):
-                    fpath = os.path.join(self.path, f)
-                    if os.path.isfile(fpath) and getFileType(fpath) == "audio":
-                        mediaInfo = MediaInfo.fromFile(fpath)
-                        self.medias.append(mediaInfo)
-                self.medias.sort()
-
-    def __lt__(self, other):
-        return self.title < other.title
-
-
 class MediaLocationSelectionDialog(QWidget):
 
     def __init__(self):
@@ -350,36 +323,12 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         else:
             self.populateMediaThread()
         
+        # Init extra UI
         self.tableView_Music = FileListView(self)
         self.verticalLayout_tablelist.addWidget(self.tableView_Music)
-
         self.horizontalSlider_volume.setValue(settings.volume)
         
-        # try:
-        #     medias = Database.load(self.MEDIAS_FILE)
-        # except:
-        #     medias = None
-
-        # if medias:
-        #     self.medias = list(filter(lambda media: media.verify(), medias))
-        #     for mediaInfo in medias:
-        #         dpath = pathUp(mediaInfo.path)
-        #         if mediaInfo.album:
-        #             if dpath not in self.albums:
-        #                 self.albums[dpath] = AlbumInfo(mediaInfo, False)
-        #             self.albums[dpath].medias.append(mediaInfo)
-        #     self.sortAlbums()
-        #     if len(medias) != len(self.medias):
-        #         Database.save(self.medias, self.MEDIAS_FILE)
-        #     if settings.fileWatch:
-        #         for media in self.medias:
-        #             self.fsWatcher.addPath(pathUp(media.path))
-        #             self.fsWatcher.addPath(media.path)
-        # elif not os.path.isdir(settings.mediaLocation):
-        #     self.change_dir()
-        # else:
-        #     self.populateMediaThread()
-        
+        # Change directory
         self.pushButton_ChangeDir.clicked.connect(self.change_dir)
 
         # Control media
@@ -399,12 +348,22 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
 
         # Control process
         self.horizontalSlider_song_duration.valueChanged.connect(self.positionSliderChanged)
+
         # Control volume
         self.horizontalSlider_volume.valueChanged.connect(self.volumeSliderChanged)
         self.pushButton_volume.clicked.connect(self.volumeButtonClicked)
 
-        self.media.durationChanged.connect(self.durationChanged)
+        # Search
+        self.lineEdit_SearchMusic.textChanged.connect(self.searchMusic)
+
+        # self.media.durationChanged.connect(self.durationChanged)
     
+    def searchMusic(self, text):
+        self.tableView_Music.tableWidget.filterText = text
+        self.tableView_Music.tableWidget.sortAndFilter()
+        if self.tableView_Music.tableWidget.specialFilter:
+            return
+
     def setWatchFiles(self):
         """ Watch file and dir """
         if settings.fileWatch:
@@ -465,11 +424,6 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
                 self.populateMedias(fpath)
             elif os.access(fpath, os.R_OK) and getFileType(fpath) == "audio":
                 mediaInfo = MediaInfo.fromFile(fpath)
-                # dpath = pathUp(mediaInfo.path)
-                # if mediaInfo.album:
-                #     if dpath not in self.albums:
-                #         self.albums[dpath] = AlbumInfo(mediaInfo, False)
-                #     self.albums[dpath].medias.append(mediaInfo)
                 batch.append(mediaInfo)
         # self.sortAlbums()
         self.medias.extend(batch)
@@ -502,8 +456,11 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         self.songInfoChanged.emit(self.mediaInfo)
     
     def mediaDurationChanged(self, duration):
-        self.horizontalSlider_song_duration.setMaximum(duration)
-        self.horizontalSlider_song_duration.setPageStep(duration // 10)
+        if duration:
+            self.mediaInfo.duration = datetime.datetime.fromtimestamp(duration)
+            self.songInfoChanged.emit(self.mediaInfo)
+            self.horizontalSlider_song_duration.setMaximum(duration)
+            self.horizontalSlider_song_duration.setPageStep(duration // 10)
     
     def mediaPositionChanged(self, position):
         self.horizontalSlider_song_duration.blockSignals(True)
@@ -517,11 +474,11 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         if volume != 0:
             settings.volume = volume
 
-    def durationChanged(self, duration):
-        """ Change song's play process """
-        if duration:
-            self.mediaInfo.duration = datetime.datetime.fromtimestamp(duration)
-            self.songInfoChanged.emit(self.mediaInfo)
+    # def durationChanged(self, duration):
+    #     """ Change song's play process """
+    #     if duration:
+    #         self.mediaInfo.duration = datetime.datetime.fromtimestamp(duration)
+    #         self.songInfoChanged.emit(self.mediaInfo)
     
     def volumeSliderChanged(self, volume):
         self.media.setVolume(volume)
