@@ -21,6 +21,12 @@ class TextFileEditor(Ui_FileEditor, QWidget):
         self.textEdit_main_editor.textChanged.connect(self.change_text)
         self.Button_save.clicked.connect(self.save_file)
 
+        qss_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'qss', 'style.qss')
+        if os.path.exists(qss_file_path):
+            with open(qss_file_path, 'r', encoding='utf8') as f:
+                stylesheet = f.read()
+            self.setStyleSheet(stylesheet)
+
         # Init open
         self.open_file(file_path)
 
