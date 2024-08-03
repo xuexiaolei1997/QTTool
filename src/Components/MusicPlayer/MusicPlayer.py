@@ -4,16 +4,19 @@ import json
 import datetime
 from functools import total_ordering
 import pickle
+import subprocess
 
 import taglib
-from PyQt5.QtCore import Qt, QFileSystemWatcher, QMimeDatabase, QUrl, pyqtSignal, QThread, QSize
+from PyQt5 import Qt
+from PyQt5.QtCore import Qt, QFileSystemWatcher, QMimeDatabase, QUrl, pyqtSignal, QThread, QSize, QObject
 from PyQt5.QtWidgets import *
-from PyQt5.QtWidgets import QWidget
 from PyQt5.QtMultimedia import *
 from PyQt5.QtGui import QIcon, QPixmap
 
 from .UI_MusicPlayer import Ui_MusicPlayer
 from .views.FileListView import FileListView
+from .settings.Settings import Settings
+from .settings.DataBase import Database
 
 mimeDatabase = QMimeDatabase()
 def getFileType(f):
@@ -48,88 +51,6 @@ def clearLayout(layout):
         child = layout.takeAt(0)
         if child.widget():
             child.widget().deleteLater()
-
-
-class Database:
-
-    # BASE = os.path.expanduser("~/.music")
-    BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings")
-
-    def getPath(filename):
-        return os.path.join(Database.BASE, filename)
-
-    # save
-    def save(obj, filename, save_json=False):
-        os.makedirs(Database.BASE, exist_ok=True)
-        with open(Database.getPath(filename), ("w" if save_json else "wb")) as f:
-            (json if save_json else pickle).dump(obj, f)
-
-    def saveFile(obj, filename, path=""):
-        path = os.path.join(Database.BASE, path)
-        os.makedirs(path, exist_ok=True)
-        with open(os.path.join(path, filename), "wb") as f:
-            f.write(obj)
-
-    # load
-    def load(filename, load_json=False, default=None):
-        try:
-            with open(Database.getPath(filename), ("r" if load_json else "rb")) as f:
-                obj = (json if load_json else pickle).load(f)
-                if default: return {**default, **obj}
-                return obj
-        except FileNotFoundError:
-            print("can't load %s" % filename)
-            return default
-
-    def loadFile(filename, default=""):
-        try:
-            with open(Database.getPath(filename), "r") as f:
-                return f.read()
-        except:
-            if not default: return ""
-            dfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", default)
-            with open(dfile, "r") as f:
-                return f.read()
-
-
-class Settings(object):
-
-    # settings
-    DEFAULT_SETTINGS = {
-        "mediaLocation": os.path.normpath(os.path.expanduser("~/.music")),
-        "fileWatch": False,
-        "redrawBackground": True,
-        "disableDecorations": False,
-        "darkTheme": False,
-        "modules": {},
-        "volume": 100,
-        "accent": "#a9c5e4",
-        "accentMid": "#7fa8d6",
-        "accentDeep": "#7fa8d6",
-    }
-    SETINGS_FILE = "settings.json"
-
-    # signals
-    changed = pyqtSignal(tuple)
-
-    def __init__(self):
-        self._dict = Database.load(Settings.SETINGS_FILE, True,
-                                   Settings.DEFAULT_SETTINGS)
-
-    def __getattr__(self, attr):
-        if attr == "_dict":
-            return object.__getattribute__(self, "_dict")
-        return self._dict[attr]
-
-    def __setattr__(self, attr, value):
-        if attr == "_dict":
-            return object.__setattr__(self, "_dict", value)
-        self._dict[attr] = value
-        self.save()
-
-    def save(self):
-        Database.save(self._dict, Settings.SETINGS_FILE, True)
-
 
 settings = Settings()
 
@@ -300,6 +221,8 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
         self.setAcceptDrops(True)
+        # self.setWindowFlags(Qt.Tool | Qt.X11BypassWindowManagerHint |
+        #                     Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setupUi(self)
 
         self.media = QMediaPlayer()
@@ -308,6 +231,12 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         self.albums = {}
         self.albumPath = ""
         self.medias = [] # medias in scan directory
+
+        # Set ffmpeg path: Ensure running in virtural environment
+        os.environ["PATH"] += os.pathsep + settings.ffmpeg_path
+
+        # Thread: exportAccompanyThread
+        self.exportAccompanyThread = QThread()
 
         self.setWatchFiles()
 
@@ -546,6 +475,78 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
             unmuted_icon.addPixmap(QPixmap(":/icons/icons/audio-volume-high.svg"), QIcon.Normal, QIcon.Off)
             self.pushButton_volume.setIcon(unmuted_icon)
             self.horizontalSlider_volume.setValue(settings.volume)
+
+    # export accompany
+    def exportAccompany(self, fpath, method, sub_model=None):
+        fpath = remove_file_prefix(fpath)
+        our_dir = QFileDialog.getExistingDirectory(self, "Open Folder", "./")
+
+        class SperateMusicAccompanyWorker(QObject):
+            success = pyqtSignal(bool)
+            finished = pyqtSignal()
+
+            def __init__(self, method, mp3_path, output_dir):
+                super().__init__()
+                self.method = method
+                self.mp3_path = mp3_path
+                self.output_dir = output_dir
+                self.sub_model = sub_model
+
+            def run(self):
+                import time
+                time.sleep(10)
+                try:
+                    if self.method == 'Spleeter':
+                        res = self.export_with_spleeter()
+                    elif self.method == 'Demucs':
+                        res = self.export_with_demucs()
+                    self.success.emit(res)
+                except Exception as e:
+                    print(str(e))
+                    self.success.emit(False)
+                finally:
+                    self.finished.emit()
+
+            def export_with_spleeter(self):
+                from spleeter.separator import Separator
+                separator = Separator('spleeter:2stems')
+                separator.separate_to_file(self.mp3_path, self.output_dir)
+                return True
+
+            def export_with_demucs(self):
+                if not self.check_ffmpeg():
+                    return
+                res = subprocess.run(['demucs', '-o', self.output_dir, self.mp3_path])
+                return True if res.returncode == 0 else False
+
+            def check_ffmpeg(self):
+                try:
+                    subprocess.run(['ffmpeg', '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    return True
+                except FileNotFoundError:
+                    QMessageBox.critical(None, "FFmpeg Not Found", "FFmpeg is required for Demucs. Please install FFmpeg and try again.")
+                    return False
+        
+        def exec_result(res: bool):
+            if res:
+                QMessageBox.information(self, "Export Success", "The instrumental track has been successfully exported.")
+            else:
+                QMessageBox.critical(self, "Export Fail", "The instrumental exported failed.")
+        
+        if hasattr(self, "exportAccompanyThread") and self.exportAccompanyThread.isRunning():
+            QMessageBox.critical(self, "Error", "Current export task is executing.")
+            return
+
+        self.worker = SperateMusicAccompanyWorker(method, fpath, our_dir)
+        self.worker.moveToThread(self.exportAccompanyThread)
+
+        self.exportAccompanyThread.started.connect(self.worker.run)
+        self.worker.success.connect(exec_result)
+        self.worker.finished.connect(self.exportAccompanyThread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+
+        self.exportAccompanyThread.start()
+
 
     def watchFileChanged(self, fpath):
         pass

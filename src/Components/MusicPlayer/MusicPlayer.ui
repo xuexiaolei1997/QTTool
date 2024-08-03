@@ -112,6 +112,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_ChangeDir">
+         <property name="statusTip">
+          <string>Select Music Folder</string>
+         </property>
          <property name="whatsThis">
           <string>Select Music Folder</string>
          </property>
@@ -134,6 +137,23 @@
         <widget class="Line" name="line_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_accompany">
+         <property name="statusTip">
+          <string>Extract Accompany</string>
+         </property>
+         <property name="whatsThis">
+          <string>Extract Accompany</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="musicplayer.qrc">
+           <normaloff>:/icons/icons/album.svg</normaloff>:/icons/icons/album.svg</iconset>
          </property>
         </widget>
        </item>

@@ -4,6 +4,7 @@ from PyQt5.QtGui import QColor
 from operator import attrgetter
 
 import re
+from ..settings.DataBase import Database
 
 FILTER_REGEX = re.compile(r'\b(artist|album|aartist)\:"((?:[^"\\]|\\.)*)"', re.IGNORECASE)
 
@@ -173,17 +174,47 @@ class FileListTableWidget(QTableWidget):
         self.hoverRow = -1
 
     def mousePressEvent(self, e):
-        QTableWidget.mousePressEvent(self, e)
-        if self.hoverRow == -1: return
-        if  e.modifiers() & Qt.ControlModifier or \
-            e.modifiers() & Qt.ShiftModifier:
-            return
-        index = self.indexAt(e.pos())
-        mainWindow = self.parent_
-        if self.mediaRow:
-            if mainWindow.mediaInfo and self.mediaRow[index.row()] == mainWindow.mediaInfo:
+        if e.button() == Qt.RightButton:
+            e.accept()
+        else:
+            QTableWidget.mousePressEvent(self, e)
+            if self.hoverRow == -1: return
+            if  e.modifiers() & Qt.ControlModifier or \
+                e.modifiers() & Qt.ShiftModifier:
                 return
-            mainWindow.setSong(self.mediaRow[index.row()])
+            index = self.indexAt(e.pos())
+            mainWindow = self.parent_
+            if self.mediaRow:
+                if mainWindow.mediaInfo and self.mediaRow[index.row()] == mainWindow.mediaInfo:
+                    return
+                mainWindow.setSong(self.mediaRow[index.row()])
+    
+    def contextMenuEvent(self, event):
+        index = self.indexAt(event.pos())
+        if index.isValid():
+            menu = QMenu(self)
+
+            action_play_music = QAction("Play", self)
+            action_play_music.triggered.connect(lambda: self.parent_.setSong(self.mediaRow[index.row()]))
+
+            menu_export_accompany = QMenu("Export Accompany", self)
+
+            
+            for accompany_algorithm in Database.ACCOMPANY_ALGORITHM_LIST:
+                variable_name = f'action_export_accompany_{accompany_algorithm}'
+                locals()[variable_name] = QAction(accompany_algorithm, self)
+                locals()[variable_name].triggered.connect(lambda: self.parent_.exportAccompany(self.parent_.medias[index.row()].path, accompany_algorithm))
+                menu_export_accompany.addAction(locals()[variable_name])
+            # action_export_accompany_Spleeter = QAction("Spleeter", self)
+            # action_export_accompany_Spleeter.triggered.connect(lambda: self.parent_.exportAccompany(self.parent_.medias[index.row()].path, 'Spleeter'))
+            # action_export_accompany_Demucs = QAction("Demucs", self)
+            # action_export_accompany_Demucs.triggered.connect(lambda: self.parent_.exportAccompany(self.parent_.medias[index.row()].path, 'Demucs'))
+            # menu_export_accompany.addAction(action_export_accompany_Spleeter)
+            # menu_export_accompany.addAction(action_export_accompany_Demucs)
+
+            menu.addAction(action_play_music)
+            menu.addMenu(menu_export_accompany)
+            menu.exec_(self.viewport().mapToGlobal(event.pos()))
 
 
 class FileListView(QWidget):
