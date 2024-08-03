@@ -478,6 +478,8 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
 
     # export accompany
     def exportAccompany(self, fpath, method, sub_model=None):
+        if method not in Database.ACCOMPANY_ALGORITHM_LIST:
+            return
         fpath = remove_file_prefix(fpath)
         our_dir = QFileDialog.getExistingDirectory(self, "Open Folder", "./")
 
@@ -493,8 +495,6 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
                 self.sub_model = sub_model
 
             def run(self):
-                import time
-                time.sleep(10)
                 try:
                     if self.method == 'Spleeter':
                         res = self.export_with_spleeter()
