@@ -216,8 +216,6 @@ class MediaLocationSelectionDialog(QWidget):
 
 class MusicPlayer(Ui_MusicPlayer, QDialog):
 
-    MEDIAS_FILE = "medias.pkl"
-
     def __init__(self, parent: QWidget):
         super().__init__(parent)
         self.setAcceptDrops(True)
@@ -331,7 +329,6 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
 
             def run(self_):
                 self.populateMedias(settings.mediaLocation)
-                # Database.save(self.medias, self.MEDIAS_FILE)
                 del self._thread
 
         self._thread = ProcessMediaThread()

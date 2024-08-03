@@ -49,7 +49,9 @@
         <widget class="QLabel" name="label_file_path">
          <property name="font">
           <font>
-           <pointsize>12</pointsize>
+           <pointsize>15</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
           </font>
          </property>
          <property name="text">
@@ -83,7 +85,7 @@
       <widget class="QTextEdit" name="textEdit_main_editor">
        <property name="font">
         <font>
-         <pointsize>10</pointsize>
+         <pointsize>12</pointsize>
         </font>
        </property>
        <property name="tabChangesFocus">
@@ -108,6 +110,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="Button_save">
+         <property name="font">
+          <font>
+           <pointsize>15</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Save</string>
          </property>
