@@ -8,6 +8,7 @@ from common.Stack import Stack
 from Components.FileBrowserDock import FileBrowserDock
 from Components.TextFileEditor.TextFileEditor import TextFileEditor
 from Components.MusicPlayer.MusicPlayer import MusicPlayer
+from Components.Terminal.Terminal import Terminal
 from UI.UI_MainWindow import Ui_MainWindow
 
 
@@ -35,6 +36,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         # >> View
         self.music_player = None
         self.actionMusic.triggered.connect(self.open_music_player)
+        self.actionTerminal.triggered.connect(self.open_terminal)
 
         # >> Help
         self.actionAbout.triggered.connect(self.show_about)
@@ -66,6 +68,11 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         if self.music_player is None:
             self.music_player = MusicPlayer(self)
         self.music_player.show()
+    
+    def open_terminal(self):
+        terminal = Terminal(self, os.path.dirname(os.path.abspath(__file__)))
+        self.dockWidget_Bottom.setWidget(terminal)
+        terminal.show()
     
     def close(self):
         sys.exit()

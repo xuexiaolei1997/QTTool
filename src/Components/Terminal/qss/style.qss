@@ -1,0 +1,5 @@
+QTextEdit {
+    background-color: black;
+    color: white;
+    font-family: Consolas, "Courier New", monospace;
+}

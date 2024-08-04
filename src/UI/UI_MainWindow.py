@@ -128,6 +128,8 @@ class Ui_MainWindow(object):
         self.actionUndo.setObjectName("actionUndo")
         self.actionMusic = QtWidgets.QAction(MainWindow)
         self.actionMusic.setObjectName("actionMusic")
+        self.actionTerminal = QtWidgets.QAction(MainWindow)
+        self.actionTerminal.setObjectName("actionTerminal")
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionOpen_Folder)
@@ -142,6 +144,7 @@ class Ui_MainWindow(object):
         self.menuView.addAction(self.actionOperation)
         self.menuView.addAction(self.actionDraw)
         self.menuView.addAction(self.actionMusic)
+        self.menuView.addAction(self.actionTerminal)
         self.menuHelp.addAction(self.actionAbout)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
@@ -195,4 +198,5 @@ class Ui_MainWindow(object):
         self.actionUndo.setText(_translate("MainWindow", "Undo"))
         self.actionUndo.setShortcut(_translate("MainWindow", "Ctrl+Z"))
         self.actionMusic.setText(_translate("MainWindow", "Music"))
+        self.actionTerminal.setText(_translate("MainWindow", "Terminal"))
 import pictures_rc

@@ -67,6 +67,7 @@
     <addaction name="actionOperation"/>
     <addaction name="actionDraw"/>
     <addaction name="actionMusic"/>
+    <addaction name="actionTerminal"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -118,9 +119,7 @@
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="QWidget" name="dockWidget_Operation">
-    <layout class="QVBoxLayout" name="verticalLayout_2"/>
-   </widget>
+   <widget class="QWidget" name="dockWidget_Operation"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
@@ -316,6 +315,11 @@
   <action name="actionMusic">
    <property name="text">
     <string>Music</string>
+   </property>
+  </action>
+  <action name="actionTerminal">
+   <property name="text">
+    <string>Terminal</string>
    </property>
   </action>
  </widget>
