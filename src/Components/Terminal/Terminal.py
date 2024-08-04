@@ -4,7 +4,7 @@ import sys
 import subprocess
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QTextEdit, QLineEdit, QPushButton, QLabel, QVBoxLayout
 from PyQt5.QtCore import QThread, Qt, pyqtSignal, QObject, QMetaObject, QCoreApplication
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QTextCursor
 
 from .UI_Terminal import Ui_Form_Terminal
 
@@ -51,9 +51,18 @@ class TerminalTextEdit(QTextEdit):
     
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Return:
-            self.parent_.run_command()  # 执行自定义操作
+            self.parent_.run_command()
+            self.ensure_cursor_at_end()
+        elif event.key() in (Qt.Key_Backspace, Qt.Key_Delete):
+            super().keyPressEvent(event)
+            self.ensure_cursor_at_end()
         else:
-            super().keyPressEvent(event)  # 调用父类方法，确保其他按键正常处理
+            super().keyPressEvent(event)
+    
+    def ensure_cursor_at_end(self):
+        cursor = self.textCursor()
+        cursor.movePosition(QTextCursor.End)
+        self.setTextCursor(cursor)
     
 
 class Terminal(Ui_Form_Terminal, QWidget):
