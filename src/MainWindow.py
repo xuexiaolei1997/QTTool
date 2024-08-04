@@ -70,6 +70,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.music_player.show()
     
     def open_terminal(self):
+        self.actionTerminal.setChecked(True)
+        self.dockWidget_Bottom.setVisible(True)
         terminal = Terminal(self, os.path.dirname(os.path.abspath(__file__)))
         self.dockWidget_Bottom.setWidget(terminal)
         terminal.show()

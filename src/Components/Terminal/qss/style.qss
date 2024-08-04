@@ -1,5 +1,6 @@
-QTextEdit {
+QTextBrowser, QLabel, QLineEdit {
     background-color: black;
     color: white;
-    font-family: Consolas, "Courier New", monospace;
+    border: 5px;
+    border-color: black;
 }
