@@ -479,6 +479,8 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
             return
         fpath = remove_file_prefix(fpath)
         our_dir = QFileDialog.getExistingDirectory(self, "Open Folder", "./")
+        if our_dir == "":
+            return
 
         class SperateMusicAccompanyWorker(QObject):
             success = pyqtSignal(bool)
