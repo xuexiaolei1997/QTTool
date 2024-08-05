@@ -3,20 +3,19 @@ QWidget {
 }
 /* widgets */
 QPushButton, QLineEdit {
-    color: rgb(153, 170, 181);
-    background: #f3f3f3;
+    color: rgb(138, 194, 231);
+    background: #eedfdf;
+    padding: 5px 10px;
 }
 QLineEdit {
-    color: #000;
-}
-QLineEdit, QPushButton {
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    padding: 5px 10px;
+    color: #ae26fd;
     border-radius: 5px;
+    padding: 5px 10px;
 }
 QPushButton:hover {
-    background: #a9c5e4;
-    color: #fff;
+    border: 1px solid rgba(46, 112, 233, 0.959);
+    background: rgb(69, 224, 178);
+    color: #20151c;
 }
 QSlider::groove:horizontal {
     height: 6px;
@@ -50,7 +49,6 @@ QScrollBar::handle {
 }
 QTableWidget{
     background: #56ebff;
-    alternate-background-color: #fbfbfb;
     border: 1px rgb(10, 253, 152);
 }
 QHeaderView::section, QHeaderView::section:last:hover {

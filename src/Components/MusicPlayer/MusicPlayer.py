@@ -57,53 +57,23 @@ settings = Settings()
 
 @total_ordering
 class MediaInfo(object):
-    IMAGE_CACHE = os.path.join("./", "cache")
+    
     def __init__(self, path,
                        pos=0,
                        title="", artist="",
                        album="", albumArtist="",
-                       duration=datetime.datetime.fromtimestamp(0),
-                       image=None, year=0):
+                       duration=datetime.datetime.fromtimestamp(0)):
         self.path = path
         self.pos = pos
         self.title = title if title else path
         self.artist = artist
         self.album = album
         self.albumArtist = albumArtist
-        self.year = year
         self.duration = duration
-        self.image = image
-    
-    def searchImage(path, song=None):
-        return None
-        # if song and song.picture:
-        #     picture = song.picture
-        #     ext = imageMimetypeToExt(picture.mimetype)
-        #     dataHash = md5(picture.data).hexdigest()
-        #     fpath = os.path.join(MediaInfo.IMAGE_CACHE, dataHash + ext)
-        #     if os.path.isfile(fpath): return fpath
-        #     Database.saveFile(picture.data, dataHash + ext, "cache")
-        #     return fpath
-
-        # searchPath = pathUp(path)
-        # paths = list(filter(lambda path: getFileType(path) == "image", os.listdir(searchPath)))
-        # if paths:
-        #     prioritize = ["Case Cover Back Outer", "Cover.", "cover.", "CD."]
-        #     def find_path():
-        #         for path in paths:
-        #             for priority in prioritize:
-        #                 if path.startswith(priority):
-        #                     return path
-        #         return paths[0]
-        #     return os.path.join(searchPath, find_path())
-        # else:
-        #     return None
 
     def verify(self):
         if self.path.startswith("file://") and not os.path.isfile(remove_file_prefix(self.path)):
             return False
-        if self.image and not os.path.isfile(self.image):
-            self.image = MediaInfo.searchImage(self.path)
         return True
     
     def fromFile(path):
@@ -130,14 +100,9 @@ class MediaInfo(object):
         try: albumArtist = song.tags["ALBUMARTIST"][0]
         except: albumArtist = artist
 
-        try: year = int(song.tags["DATE"][0])
-        except: year = -1
-
         return MediaInfo(QUrl.fromLocalFile(path).toString(), pos, title, artist,
                          album, albumArtist,
-                         datetime.datetime.fromtimestamp(song.length),
-                         MediaInfo.searchImage(path, song),
-                         year)
+                         datetime.datetime.fromtimestamp(song.length))
 
     # comparators
     def __lt__(self, other):
@@ -391,12 +356,6 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         self.horizontalSlider_volume.blockSignals(False)
         if volume != 0:
             settings.volume = volume
-
-    # def durationChanged(self, duration):
-    #     """ Change song's play process """
-    #     if duration:
-    #         self.mediaInfo.duration = datetime.datetime.fromtimestamp(duration)
-    #         self.songInfoChanged.emit(self.mediaInfo)
     
     def volumeSliderChanged(self, volume):
         self.media.setVolume(volume)
@@ -507,7 +466,7 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
             def export_with_demucs(self):
                 if not self.check_ffmpeg():
                     return
-                res = subprocess.run(['demucs', '-o', self.output_dir, self.mp3_path])
+                res = subprocess.run(['demucs', '-o', self.output_dir, "--two-stems", "vocals", self.mp3_path])
                 return True if res.returncode == 0 else False
 
             def check_ffmpeg(self):
@@ -544,19 +503,9 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
 
     def watchDirChanged(self, dpath):
         self.medias = []
-        # TODO: handle directories
-        # oldPaths = set(filter(lambda fpath: pathUp(fpath) == dpath,
-        #     map(lambda info: remove_file_prefix(info.path), self.medias)))
         newPaths = set(map(lambda fpath: os.path.join(dpath, fpath),
                 filter(lambda fpath: getFileType(fpath) == "audio", os.listdir(dpath))))
 
-        # fremoved = oldPaths.difference(newPaths)
-        # self.medias = list(filter(lambda media: remove_file_prefix(media.path) not in fremoved, self.medias))
-        # for added in newPaths.difference(oldPaths):
-        #     try:
-        #         self.medias.append(MediaInfo.fromFile(added))
-        #     except OSError:
-        #         return
         for added in newPaths:
             try:
                 self.medias.append(MediaInfo.fromFile(added))

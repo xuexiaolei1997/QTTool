@@ -42,9 +42,9 @@ class FileListTableWidget(QTableWidget):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.verticalHeader().setVisible(False)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.setHorizontalHeaderLabels(["Time", "Name", "Artist", "Album", "Album artist", "Year", ""])
+        self.setHorizontalHeaderLabels(["Time", "Name", "Artist", "Album", "Album artist"])
         self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents) # dur
-        self.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents) # year
+        self.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents) # title
         self.horizontalHeader().setGraphicsEffect(dropShadow())
         self.horizontalHeader().sectionClicked.connect(self.headerClicked)
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -83,8 +83,6 @@ class FileListTableWidget(QTableWidget):
         self.setItem(self.nrows, 2, QTableWidgetItem(mediaInfo.artist))
         self.setItem(self.nrows, 3, QTableWidgetItem(mediaInfo.album))
         self.setItem(self.nrows, 4, QTableWidgetItem(mediaInfo.albumArtist))
-        self.setItem(self.nrows, 5, QTableWidgetItem(str(mediaInfo.year) if mediaInfo.year != -1 else ""))
-        self.setItem(self.nrows, 6, QTableWidgetItem("")) # filler
         self.setRowHeight(self.nrows, 40)
         self.nrows += 1
 
@@ -111,19 +109,13 @@ class FileListTableWidget(QTableWidget):
         if self.filterText:
             self.specialFilter = True
             matches = FILTER_REGEX.findall(self.filterText)
-            print(matches)
+            
             if matches:
                 matches = list(map(lambda m: (m[0], m[1].lower()), matches))
                 def func(media):
                     for (key, value) in matches:
                         if key == "artist":
                             if value not in media.artist.lower():
-                                return False
-                        elif key == "album":
-                            if value not in media.album.lower():
-                                return False
-                        elif key == "aartist":
-                            if value not in media.albumArtist.lower():
                                 return False
                     return True
                 self.mediaRow = list(filter(func, self.parent_.medias))
@@ -151,7 +143,6 @@ class FileListTableWidget(QTableWidget):
         elif index == 2: key = 'artist'
         elif index == 3: key = 'album'
         elif index == 4: key = 'albumArtist'
-        elif index == 5: key = 'year'
         else: return
 
         if key == self.sortKey:
@@ -170,8 +161,8 @@ class FileListTableWidget(QTableWidget):
         else:
             self.hoverRow = index.row()
 
-    def leaveEvent(self, e):
-        self.hoverRow = -1
+    # def leaveEvent(self, e):
+    #     self.hoverRow = -1
 
     def mousePressEvent(self, e):
         if e.button() == Qt.RightButton:
@@ -198,19 +189,12 @@ class FileListTableWidget(QTableWidget):
             action_play_music.triggered.connect(lambda: self.parent_.setSong(self.mediaRow[index.row()]))
 
             menu_export_accompany = QMenu("Export Accompany", self)
-
             
             for accompany_algorithm in Database.ACCOMPANY_ALGORITHM_LIST:
                 variable_name = f'action_export_accompany_{accompany_algorithm}'
                 locals()[variable_name] = QAction(accompany_algorithm, self)
                 locals()[variable_name].triggered.connect(lambda: self.parent_.exportAccompany(self.parent_.medias[index.row()].path, accompany_algorithm))
                 menu_export_accompany.addAction(locals()[variable_name])
-            # action_export_accompany_Spleeter = QAction("Spleeter", self)
-            # action_export_accompany_Spleeter.triggered.connect(lambda: self.parent_.exportAccompany(self.parent_.medias[index.row()].path, 'Spleeter'))
-            # action_export_accompany_Demucs = QAction("Demucs", self)
-            # action_export_accompany_Demucs.triggered.connect(lambda: self.parent_.exportAccompany(self.parent_.medias[index.row()].path, 'Demucs'))
-            # menu_export_accompany.addAction(action_export_accompany_Spleeter)
-            # menu_export_accompany.addAction(action_export_accompany_Demucs)
 
             menu.addAction(action_play_music)
             menu.addMenu(menu_export_accompany)
@@ -232,18 +216,14 @@ class FileListView(QWidget):
         vboxLayout.setSpacing(0)
         self.setLayout(vboxLayout)
 
-        # self.searchView = SearchView()
-        # self.searchView.hide()
-        # vboxLayout.addWidget(self.searchView)
-
         self.tableWidget = tableWidget = FileListTableWidget(self.parent_)
         tableWidget.resizeEvent = self.tableResizeEvent
         tableWidget.setAlternatingRowColors(True)
         vboxLayout.addWidget(tableWidget, 1)
 
-        self.scrollBar = tableWidget.verticalScrollBar()
-        self.scrollBar.setParent(self)
-        self.scrollBar.show()
+        # self.scrollBar = tableWidget.verticalScrollBar()
+        # self.scrollBar.setParent(self)
+        # self.scrollBar.show()
 
         if self.parent_.medias:
             self.tableWidget.mediasAdded(self.parent_.medias)
@@ -257,9 +237,9 @@ class FileListView(QWidget):
 
     def tableResizeEvent(self, event):
         QTableWidget.resizeEvent(self.tableWidget, event)
-        WIDTH = self.scrollBar.sizeHint().width()
-        self.scrollBar.setGeometry(QRect(
-            self.tableWidget.width()-WIDTH,
-            self.tableWidget.y()+self.tableWidget.horizontalHeader().height(),
-            WIDTH, self.tableWidget.height()-self.tableWidget.horizontalHeader().height()
-        ))
+        # WIDTH = self.scrollBar.sizeHint().width()
+        # self.scrollBar.setGeometry(QRect(
+        #     self.tableWidget.width()-WIDTH,
+        #     self.tableWidget.y()+self.tableWidget.horizontalHeader().height(),
+        #     WIDTH, self.tableWidget.height()-self.tableWidget.horizontalHeader().height()
+        # ))
