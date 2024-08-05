@@ -34,7 +34,7 @@ class FileListTableItemDelegate(QStyledItemDelegate):
 
 class FileListTableWidget(QTableWidget):
     # https://github.com/lowbees/Hover-entire-row-of-QTableView
-    def __init__(self, parent=None, rows=1, cols=7):
+    def __init__(self, parent=None, rows=1, cols=5):
         QTableView.__init__(self, rows, cols)
         self.parent_ = parent
 
