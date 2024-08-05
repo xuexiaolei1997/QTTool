@@ -201,10 +201,10 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         self.setWatchFiles()
 
         self.setStyles()
-        if settings.redrawBackground:
-            # workaround for qt themes with transparent backgrounds
-            self.setProperty("class", "redraw-background")
-            self.style().unpolish(self)
+        # if settings.redrawBackground:
+        #     # workaround for qt themes with transparent backgrounds
+        #     self.setProperty("class", "redraw-background")
+        #     self.style().unpolish(self)
         
         # load file
         if not os.path.isdir(settings.mediaLocation):
@@ -265,8 +265,8 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
             del self.fsWatcher
 
     def setStyles(self):
-        """ Set css """
-        stylesheet = Database.loadFile("style.css")
+        """ Set qss """
+        stylesheet = Database.loadFile("style.qss")
         self.setStyleSheet(stylesheet)
 
     def change_dir(self):
