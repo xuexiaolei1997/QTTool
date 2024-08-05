@@ -15,6 +15,7 @@ class Application(QApplication):
     def exec(_):
         self = Application
         self.mainWindow = MainWindow()
+        self.mainWindow.show()
         return QApplication.exec()
 
 import pictures_rc
