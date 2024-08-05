@@ -4,8 +4,8 @@ import pickle
 
 class Database:
 
-    # BASE = os.path.expanduser("~/.music")
-    BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+    BASE = os.path.expanduser("~/.tool/MusicPlayer/")
+    # BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
     # Algorithm of Export Accompany from Music
     ACCOMPANY_ALGORITHM_LIST = ["Spleeter", "Demucs"]

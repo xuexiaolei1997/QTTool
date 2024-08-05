@@ -207,7 +207,7 @@ class MediaLocationSelectionDialog(QWidget):
 
     def refreshMedia(self, dpath):
         if os.path.isdir(dpath):
-            settings.mediaLocation = dpath
+            settings.mediaLocation = dpath  # update settings.json
             self.musicLocationInput.setText(dpath)
             self.okButton.setEnabled(True)
         else:
@@ -225,15 +225,12 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
 
         self.media = QMediaPlayer()
         self.mediaInfo = None
-        self.album = None
-        self.albums = {}
-        self.albumPath = ""
         self.medias = [] # medias in scan directory
 
         # Set ffmpeg path: Ensure running in virtural environment
         os.environ["PATH"] += os.pathsep + settings.ffmpeg_path
 
-        # Thread: exportAccompanyThread
+        # Thread: Used 2 Export Accompany
         self.exportAccompanyThread = QThread()
 
         self.setWatchFiles()
@@ -265,8 +262,8 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         self.media.durationChanged.connect(self.mediaDurationChanged)
         self.media.positionChanged.connect(self.mediaPositionChanged)
         self.media.volumeChanged.connect(self.mediaVolumeChanged)
-        self.media.setVolume(settings.volume)
         self.media.mutedChanged.connect(self.mutedChanged)
+        self.media.setVolume(settings.volume)
 
         # Control songs
         self.pushButton_pause.clicked.connect(self.playPause)
@@ -282,8 +279,6 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
 
         # Search
         self.lineEdit_SearchMusic.textChanged.connect(self.searchMusic)
-
-        # self.media.durationChanged.connect(self.durationChanged)
     
     def searchMusic(self, text):
         self.tableView_Music.tableWidget.filterText = text
@@ -306,10 +301,7 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
 
     def setStyles(self):
         """ Set css """
-        stylesheet = Database.loadFile("style.css", "dark.css" if settings.darkTheme else "style.css")
-        stylesheet = stylesheet.replace("ACCENTDEEP", settings.accentDeep) \
-                      .replace("ACCENTMID", settings.accentMid)    \
-                      .replace("ACCENT", settings.accent)
+        stylesheet = Database.loadFile("style.css")
         self.setStyleSheet(stylesheet)
 
     def change_dir(self):

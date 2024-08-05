@@ -7,17 +7,11 @@ class Settings(object):
 
     # settings
     DEFAULT_SETTINGS = {
-        "mediaLocation": os.path.normpath(os.path.expanduser("~/.music")),
+        "mediaLocation": os.path.normpath(os.path.expanduser("~/.tool/MusicPlayer")),
         "fileWatch": False,
         "redrawBackground": True,
-        "disableDecorations": False,
-        "darkTheme": False,
-        "modules": {},
         "volume": 100,
-        "accent": "#a9c5e4",
-        "accentMid": "#7fa8d6",
-        "accentDeep": "#7fa8d6",
-        "ffmpeg_path": "D:\\Software\\ffmpeg-7.0.2-full_build-shared\\bin"
+        "ffmpeg_path": ""
     }
     SETINGS_FILE = "settings.json"
 
