@@ -1,5 +1,7 @@
 import os
 import sys
+import traceback
+
 from PyQt5.QtWidgets import QMessageBox
 from Application import Application
 
@@ -10,7 +12,6 @@ def excepthook(exctype, value, tb):
     print("Execption Value:", value)
     print("Execption Traceback:", tb)
 
-    import traceback
     traceback.print_tb(tb)
     print(repr(exctype))
     response = QMessageBox.warning(Application.mainWindow, "Error", repr(value), QMessageBox.Ok | QMessageBox.Close)
