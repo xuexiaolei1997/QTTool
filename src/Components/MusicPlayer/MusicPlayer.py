@@ -436,6 +436,7 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         class SperateMusicAccompanyWorker(QObject):
             success = pyqtSignal(bool)
             finished = pyqtSignal()
+            export_accompany_process = pyqtSignal(int)
 
             def __init__(self, method, mp3_path, output_dir):
                 super().__init__()
@@ -466,8 +467,35 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
             def export_with_demucs(self):
                 if not self.check_ffmpeg():
                     return
-                res = subprocess.run(['demucs', '-o', self.output_dir, "--two-stems", "vocals", self.mp3_path])
+                
+                command = ['demucs', '-o', self.output_dir, "--two-stems", "vocals", self.mp3_path]
+                self.export_accompany_process.emit(0)
+                res = subprocess.run(command)
+                self.export_accompany_process.emit(100)
                 return True if res.returncode == 0 else False
+
+                # Bug: While running process, `process.stdout.readline()` will be blocked
+                # try:
+                #     res = False
+                #     process = subprocess.Popen(" ".join(command), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
+
+                #     while True:
+                #         output = process.stdout.readline()
+                #         if output == '' and process.poll() is not None:
+                #             break
+                #         if output:
+                #             ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+                #             output = ansi_escape.sub('', output)
+                #             match = re.search('^(\d+)%', output)
+                #             if match:
+                #                 process_value = int(match.group(1))
+                #                 print(process_value)
+                #                 self.export_accompany_process.emit(process_value)
+                #     stderr = process.communicate()[1]
+                #     res = False if stderr else True
+                # except Exception as e:
+                #     res = False
+                # return res
 
             def check_ffmpeg(self):
                 try:
