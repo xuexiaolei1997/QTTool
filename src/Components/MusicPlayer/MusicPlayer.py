@@ -303,7 +303,7 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
 
     def change_dir(self):
         """ Change music directory """
-        self.hide()
+        # self.hide()
         self.mediaSelectionDialog = MediaLocationSelectionDialog()
         def delMediaSelection():
             self.show()
