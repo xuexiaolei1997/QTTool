@@ -10,6 +10,7 @@ from Components.TextFileEditor.TextFileEditor import TextFileEditor
 from Components.MusicPlayer.MusicPlayer import MusicPlayer
 from Components.Terminal.Terminal import Terminal
 from Components.TabWidget.TabWidget import TabWidget
+from Components.CDrawer.CDrawer import CDrawer
 from UI.UI_MainWindow import Ui_MainWindow
 
 
@@ -75,6 +76,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
     def open_music_player(self):
         if self.music_player is None:
             self.music_player = MusicPlayer(self)
+            # self.rightDrawer = CDrawer(self,widget=self.music_player)
+            # self.rightDrawer.setDirection(CDrawer.RIGHT)
+        # self.rightDrawer.show()
         self.music_player.show()
     
     def open_terminal(self):
