@@ -1,10 +1,8 @@
 import os
 import sys
-from queue import Queue
 
 from PyQt5.QtWidgets import *
 
-from common.Stack import Stack
 from Components.FileBrowserDock import FileBrowserDock
 from Components.TextFileEditor.TextFileEditor import TextFileEditor
 from Components.MusicPlayer.MusicPlayer import MusicPlayer
