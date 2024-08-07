@@ -3,8 +3,10 @@ import sys
 
 from PyQt5.QtWidgets import *
 
-from Components.FileBrowserDock import FileBrowserDock
+# from Components.FileBrowserDock import FileBrowserDock
+from Components.FileTree.FileTree import FileTree
 from Components.TextFileEditor.TextFileEditor import TextFileEditor
+from Components.AnalysisData.AnalysisData import AnalysisData
 from Components.MusicPlayer.MusicPlayer import MusicPlayer
 from Components.Terminal.Terminal import Terminal
 from Components.TabWidget.TabWidget import TabWidget
@@ -66,10 +68,20 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.workspace.addSubWindow(fileEditor)
         fileEditor.show()
     
+    def create_analysis_file_window(self, file_path=""):
+        analysisData = AnalysisData(file_path)
+        self.workspace.addSubWindow(analysisData)
+        analysisData.show()
+    
     def open_folder(self):
         directory = QFileDialog.getExistingDirectory(self, "Open Folder", "./")
-        self.file_browser_dock = FileBrowserDock(self.dockWidget_Left, directory)
-        self.file_browser_dock.fileSelected.connect(self.create_text_file_window)
+        filetree = FileTree(self.dockWidget_Left, directory)
+        self.dockWidget_Left.setWidget(filetree)
+        filetree.fileSelected_Open.connect(self.create_text_file_window)
+        filetree.fileSelected_Analysis.connect(self.analysis_file)
+
+        # self.file_browser_dock = FileBrowserDock(self.dockWidget_Left, directory)
+        # self.file_browser_dock.fileSelected.connect(self.create_text_file_window)
     
     def open_music_player(self):
         if self.music_player is None:

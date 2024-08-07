@@ -19,5 +19,5 @@ class TabWidget(QTabWidget):
     def close_tab(self, index):
         tab = self.widget(index)
         self.removeTab(index)
-        tab.deleteLater()
+        tab.deleteLater()  # release reource after closed tab
     
