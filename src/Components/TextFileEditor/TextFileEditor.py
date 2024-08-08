@@ -1,8 +1,11 @@
 import os
+import re
 import chardet
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QWidget
+from PyQt5.QtGui import *
 
 from Components.TextFileEditor.UI_FileEditor import Ui_FileEditor
+
 
 class TextFileEditor(Ui_FileEditor, QWidget):
     def __init__(self, file_path="") -> None:
@@ -26,9 +29,74 @@ class TextFileEditor(Ui_FileEditor, QWidget):
             with open(qss_file_path, 'r', encoding='utf8') as f:
                 stylesheet = f.read()
             self.setStyleSheet(stylesheet)
+        
+        self.lineEdit_Search.textChanged.connect(self.SearchFromText)
 
         # Init open
         self.open_file(file_path)
+
+        # Search & Replace
+        self.search_text = ""
+        self.search_result_index_list = []
+        self.current_search_index = None
+
+        self.pushButton_SearchPrevious.clicked.connect(self.SearchPrevious)
+        self.pushButton_SearchNext.clicked.connect(self.SearchNext)
+        self.pushButton_Replace.clicked.connect(self.replace)
+        self.pushButton_ReplaceAll.clicked.connect(self.replaceAll)
+    
+    # Search & Replace Function
+    def SearchFromText(self):
+        self.search_text = self.lineEdit_Search.text()
+        if not self.search_text:
+            return
+
+        self.search_result_index_list = [match.start() for match in re.finditer(re.escape(self.search_text), self.textEdit_main_editor.toPlainText())]
+        if self.search_result_index_list:
+            self.current_search_index = 0
+            self.jump2loc()
+        else:
+            self.current_search_index = None
+            self.label_SearchIndex.setText("No Result")
+
+    def SearchPrevious(self):
+        if self.current_search_index is not None and self.current_search_index > 0:
+            self.current_search_index -= 1
+            self.jump2loc()
+
+    def SearchNext(self):
+        if self.current_search_index is not None and self.current_search_index < len(self.search_result_index_list) - 1:
+            self.current_search_index += 1
+            self.jump2loc()
+
+    def replace(self):
+        replaced_text = self.lineEdit_Replace.text()
+        if replaced_text and self.current_search_index is not None:
+            cursor = self.textEdit_main_editor.textCursor()
+            cursor.setPosition(self.search_result_index_list[self.current_search_index])
+            cursor.movePosition(cursor.Right, cursor.KeepAnchor, len(self.search_text))
+            cursor.insertText(replaced_text)
+            self.textEdit_main_editor.setTextCursor(cursor)
+            self.SearchFromText()  # Refresh search results after replacement
+    
+    def replaceAll(self):
+        replaced_text = self.lineEdit_Replace.text()
+        if replaced_text and self.search_result_index_list:
+            for index in reversed(self.search_result_index_list):  # Replace from end to avoid messing up the indices
+                cursor = self.textEdit_main_editor.textCursor()
+                cursor.setPosition(index)
+                cursor.movePosition(cursor.Right, cursor.KeepAnchor, len(self.search_text))
+                cursor.insertText(replaced_text)
+            self.SearchFromText()  # Refresh search results after replacement
+    
+    def jump2loc(self):
+        if self.current_search_index is not None:
+            self.label_SearchIndex.setText(f"Current Index: {self.current_search_index + 1}, Total: {len(self.search_result_index_list)}")
+            cursor = self.textEdit_main_editor.textCursor()
+            cursor.setPosition(self.search_result_index_list[self.current_search_index])
+            cursor.movePosition(cursor.Right, cursor.KeepAnchor, len(self.search_text))
+            self.textEdit_main_editor.setTextCursor(cursor)
+
 
     def update_file_info(self, file_path, title, file_content):
         self.file_path = file_path
