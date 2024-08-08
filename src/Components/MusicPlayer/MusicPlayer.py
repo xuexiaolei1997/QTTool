@@ -120,97 +120,6 @@ class MediaInfo(object):
         return object.__eq__(self, other)
 
 
-class MediaLocationSelectionDialog(QWidget):
-
-    def __init__(self):
-        QWidget.__init__(self)
-        self.initUI()
-        self.bindEvents()
-
-    # ui
-    def initUI(self):
-        self.setWindowTitle("oopsie woopsie!")
-        self.setWindowFlags(Qt.Dialog)
-        self.resize(QSize(320, 250))
-        self.setMinimumSize(self.size())
-
-        layout = QGridLayout()
-        self.setLayout(layout)
-
-        layout.addWidget(QWidget(), 0, 0)
-        layout.setRowStretch(0,1)
-
-        label = QLabel("Please choose a valid music directory:")
-        layout.addWidget(label, 1, 0, 1, 2)
-
-        self.musicLocationInput = musicLocationInput = QLineEdit()
-        musicLocationInput.setText(settings.mediaLocation)
-        layout.addWidget(musicLocationInput, 2, 0)
-
-        self.musicLocationBrowse = musicLocationBrowse = QPushButton("Browse...")
-        layout.addWidget(musicLocationBrowse, 2, 1)
-        layout.setColumnStretch(0, 1)
-
-        label_ffmpeg = QLabel("Please choose a valid ffmpeg directory:")
-        layout.addWidget(label_ffmpeg, 3, 0, 1, 2)
-
-        self.ffmpegDirInput = ffmpegDirInput = QLineEdit()
-        ffmpegDirInput.setText(settings.ffmpeg_path)
-        layout.addWidget(ffmpegDirInput, 4, 0)
-
-        self.ffmpeg_pathBrowse = ffmpeg_pathBrowse = QPushButton("Browse...")
-        layout.addWidget(ffmpeg_pathBrowse, 4, 1)
-        layout.setColumnStretch(0, 1)
-
-        layout.addWidget(QWidget(), 5, 0)
-        layout.setRowStretch(5,1)
-
-        self.okButton = QPushButton("OK")
-        self.okButton.setEnabled(os.path.isdir(settings.mediaLocation))
-        layout.addWidget(self.okButton, 6, 0, 1, 2, Qt.AlignRight)
-
-    # events
-    def bindEvents(self):
-        self.musicLocationBrowse.clicked.connect(self.musicLocationBrowseClicked)
-        self.ffmpeg_pathBrowse.clicked.connect(self.ffmpegBrowseClicked)
-
-    def musicLocationBrowseClicked(self):
-        self.fileDialog = dialog = QFileDialog()
-        dialog.setDirectory(settings.mediaLocation)
-        dialog.setFileMode(QFileDialog.Directory)
-        dialog.setOption(QFileDialog.ShowDirsOnly, True)
-        dialog.fileSelected.connect(self.refreshMedia)
-        dialog.show()
-    
-    def ffmpegBrowseClicked(self):
-        self.fileDialog = dialog = QFileDialog()
-        dialog.setDirectory("./")
-        dialog.setFileMode(QFileDialog.Directory)
-        dialog.setOption(QFileDialog.ShowDirsOnly, True)
-        dialog.fileSelected.connect(self.refreshFfmpeg)
-        dialog.show()
-
-    def refreshMedia(self, dpath):
-        if os.path.isdir(dpath):
-            settings.mediaLocation = dpath  # update settings.json
-            self.musicLocationInput.setText(dpath)
-            self.check_input()
-    
-    def refreshFfmpeg(self, dpath):
-        if os.path.isdir(dpath):
-            settings.ffmpeg_path = dpath  # update settings.json
-            self.ffmpegDirInput.setText(dpath)
-            self.check_input()
-    
-    def check_input(self):
-        if self.musicLocationInput.text() == "":
-            self.okButton.setEnabled(False)
-        elif self.ffmpegDirInput.text() == "":
-            self.okButton.setEnabled(False)
-        else:
-            self.okButton.setEnabled(True)
-
-
 class MusicPlayer(Ui_MusicPlayer, QDialog):
 
     def __init__(self, parent: QWidget):
@@ -240,17 +149,19 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         
         # load file
         if not os.path.isdir(settings.mediaLocation):
-            self.change_dir()
+            self.tabWidget.setCurrentIndex(1)
         else:
             self.populateMediaThread()
         
         # Init extra UI
+        self.tableView_Music.deleteLater()
         self.tableView_Music = FileListView(self)
+        self.tableView_Music.setObjectName("tableView_Music")
         self.verticalLayout_tablelist.addWidget(self.tableView_Music)
         self.horizontalSlider_volume.setValue(settings.volume)
-        
-        # Change directory
-        self.pushButton_ChangeDir.clicked.connect(self.change_dir)
+
+        self.musicLocationInput.setText(settings.mediaLocation)
+        self.ffmpegDirInput.setText(settings.ffmpeg_path)
 
         # Control media
         self.media.stateChanged.connect(self.stateChanged)
@@ -276,6 +187,8 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
 
         # Search
         self.lineEdit_SearchMusic.textChanged.connect(self.searchMusic)
+
+        self.bindSettingsEvents()
     
     def searchMusic(self, text):
         self.tableView_Music.tableWidget.filterText = text
@@ -300,17 +213,6 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         """ Set qss """
         stylesheet = Database.loadFile("style.qss")
         self.setStyleSheet(stylesheet)
-
-    def change_dir(self):
-        """ Change music directory """
-        # self.hide()
-        self.mediaSelectionDialog = MediaLocationSelectionDialog()
-        def delMediaSelection():
-            self.show()
-            self.populateMediaThread()
-            del self.mediaSelectionDialog
-        self.mediaSelectionDialog.okButton.clicked.connect(delMediaSelection)
-        self.mediaSelectionDialog.show()
 
     def populateMediaThread(self):
         """ Search music thread """
@@ -573,3 +475,34 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
                 return
         self.mediasUpdated.emit()
     
+    # >> Settings
+    # events
+    def bindSettingsEvents(self):
+        self.musicLocationBrowse.clicked.connect(self.musicLocationBrowseClicked)
+        self.ffmpeg_pathBrowse.clicked.connect(self.ffmpegBrowseClicked)
+
+    def musicLocationBrowseClicked(self):
+        self.fileDialog = dialog = QFileDialog()
+        dialog.setDirectory(settings.mediaLocation)
+        dialog.setFileMode(QFileDialog.Directory)
+        dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        dialog.fileSelected.connect(self.refreshMedia)
+        dialog.show()
+    
+    def ffmpegBrowseClicked(self):
+        self.fileDialog = dialog = QFileDialog()
+        dialog.setDirectory("./")
+        dialog.setFileMode(QFileDialog.Directory)
+        dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        dialog.fileSelected.connect(self.refreshFfmpeg)
+        dialog.show()
+
+    def refreshMedia(self, dpath):
+        if os.path.isdir(dpath):
+            settings.mediaLocation = dpath  # update settings.json
+            self.musicLocationInput.setText(dpath)
+    
+    def refreshFfmpeg(self, dpath):
+        if os.path.isdir(dpath):
+            settings.ffmpeg_path = dpath  # update settings.json
+            self.ffmpegDirInput.setText(dpath)

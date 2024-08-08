@@ -96,6 +96,7 @@
      <string>CustomTool</string>
     </property>
     <addaction name="actionMusicPlayer"/>
+    <addaction name="actionChat"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -282,6 +283,11 @@
   <action name="actionMusicPlayer">
    <property name="text">
     <string>MusicPlayer</string>
+   </property>
+  </action>
+  <action name="actionChat">
+   <property name="text">
+    <string>Chat</string>
    </property>
   </action>
  </widget>
