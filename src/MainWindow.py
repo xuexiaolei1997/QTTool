@@ -4,7 +4,6 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-# from Components.FileBrowserDock import FileBrowserDock
 from Components.FileTree.FileTree import FileTree
 from Components.TextFileEditor.TextFileEditor import TextFileEditor
 from Components.TableDataEditor.TableDataEditor import TableDataEditor
@@ -104,10 +103,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         filetree.fileSelected_Open.connect(self.create_text_file_window)
         filetree.fileSelected_Analysis.connect(self.create_analysis_file_window)
         self.verticalLayout_page_folder.addWidget(filetree)
-        
-
-        # self.file_browser_dock = FileBrowserDock(self.dockWidget_Left, directory)
-        # self.file_browser_dock.fileSelected.connect(self.create_text_file_window)
     
     def open_music_player(self):
         if self.music_player is None:
