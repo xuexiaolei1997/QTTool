@@ -78,7 +78,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         filetree = FileTree(self.dockWidget_Left, directory)
         self.dockWidget_Left.setWidget(filetree)
         filetree.fileSelected_Open.connect(self.create_text_file_window)
-        filetree.fileSelected_Analysis.connect(self.analysis_file)
+        filetree.fileSelected_Analysis.connect(self.create_analysis_file_window)
+        filetree.show()
 
         # self.file_browser_dock = FileBrowserDock(self.dockWidget_Left, directory)
         # self.file_browser_dock.fileSelected.connect(self.create_text_file_window)
