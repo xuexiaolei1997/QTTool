@@ -55,6 +55,79 @@ def clearLayout(layout):
 settings = Settings()
 
 
+class SperateMusicAccompanyWorker(QObject):
+    success = pyqtSignal(bool)
+    finished = pyqtSignal()
+    export_accompany_process = pyqtSignal(int)
+
+    def __init__(self, method, mp3_path, output_dir):
+        super().__init__()
+        self.method = method
+        self.mp3_path = mp3_path
+        self.output_dir = output_dir
+        self.sub_model = sub_model
+
+    def run(self):
+        try:
+            if self.method == 'Spleeter':
+                res = self.export_with_spleeter()
+            elif self.method == 'Demucs':
+                res = self.export_with_demucs()
+            self.success.emit(res)
+        except Exception as e:
+            print(str(e))
+            self.success.emit(False)
+        finally:
+            self.finished.emit()
+
+    def export_with_spleeter(self):
+        from spleeter.separator import Separator
+        separator = Separator('spleeter:2stems')
+        separator.separate_to_file(self.mp3_path, self.output_dir)
+        return True
+
+    def export_with_demucs(self):
+        if not self.check_ffmpeg():
+            return
+        
+        command = ['demucs', '-o', self.output_dir, "--two-stems", "vocals", self.mp3_path]
+        self.export_accompany_process.emit(0)
+        res = subprocess.run(command)
+        self.export_accompany_process.emit(100)
+        return True if res.returncode == 0 else False
+
+        # Bug: While running process, `process.stdout.readline()` will be blocked
+        # try:
+        #     res = False
+        #     process = subprocess.Popen(" ".join(command), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
+
+        #     while True:
+        #         output = process.stdout.readline()
+        #         if output == '' and process.poll() is not None:
+        #             break
+        #         if output:
+        #             ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+        #             output = ansi_escape.sub('', output)
+        #             match = re.search('^(\d+)%', output)
+        #             if match:
+        #                 process_value = int(match.group(1))
+        #                 print(process_value)
+        #                 self.export_accompany_process.emit(process_value)
+        #     stderr = process.communicate()[1]
+        #     res = False if stderr else True
+        # except Exception as e:
+        #     res = False
+        # return res
+
+    def check_ffmpeg(self):
+        try:
+            subprocess.run(['ffmpeg', '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            return True
+        except FileNotFoundError:
+            QMessageBox.critical(None, "FFmpeg Not Found", "FFmpeg is required for Demucs. Please install FFmpeg and try again.")
+            return False
+                
+
 @total_ordering
 class MediaInfo(object):
     
@@ -366,78 +439,6 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
         our_dir = QFileDialog.getExistingDirectory(self, "Open Folder", "./")
         if our_dir == "":
             return
-
-        class SperateMusicAccompanyWorker(QObject):
-            success = pyqtSignal(bool)
-            finished = pyqtSignal()
-            export_accompany_process = pyqtSignal(int)
-
-            def __init__(self, method, mp3_path, output_dir):
-                super().__init__()
-                self.method = method
-                self.mp3_path = mp3_path
-                self.output_dir = output_dir
-                self.sub_model = sub_model
-
-            def run(self):
-                try:
-                    if self.method == 'Spleeter':
-                        res = self.export_with_spleeter()
-                    elif self.method == 'Demucs':
-                        res = self.export_with_demucs()
-                    self.success.emit(res)
-                except Exception as e:
-                    print(str(e))
-                    self.success.emit(False)
-                finally:
-                    self.finished.emit()
-
-            def export_with_spleeter(self):
-                from spleeter.separator import Separator
-                separator = Separator('spleeter:2stems')
-                separator.separate_to_file(self.mp3_path, self.output_dir)
-                return True
-
-            def export_with_demucs(self):
-                if not self.check_ffmpeg():
-                    return
-                
-                command = ['demucs', '-o', self.output_dir, "--two-stems", "vocals", self.mp3_path]
-                self.export_accompany_process.emit(0)
-                res = subprocess.run(command)
-                self.export_accompany_process.emit(100)
-                return True if res.returncode == 0 else False
-
-                # Bug: While running process, `process.stdout.readline()` will be blocked
-                # try:
-                #     res = False
-                #     process = subprocess.Popen(" ".join(command), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
-
-                #     while True:
-                #         output = process.stdout.readline()
-                #         if output == '' and process.poll() is not None:
-                #             break
-                #         if output:
-                #             ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
-                #             output = ansi_escape.sub('', output)
-                #             match = re.search('^(\d+)%', output)
-                #             if match:
-                #                 process_value = int(match.group(1))
-                #                 print(process_value)
-                #                 self.export_accompany_process.emit(process_value)
-                #     stderr = process.communicate()[1]
-                #     res = False if stderr else True
-                # except Exception as e:
-                #     res = False
-                # return res
-
-            def check_ffmpeg(self):
-                try:
-                    subprocess.run(['ffmpeg', '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    return True
-                except FileNotFoundError:
-                    QMessageBox.critical(None, "FFmpeg Not Found", "FFmpeg is required for Demucs. Please install FFmpeg and try again.")
-                    return False
         
         def exec_result(res: bool):
             if res:
