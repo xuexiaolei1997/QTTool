@@ -2,11 +2,12 @@ import os
 import sys
 
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
 # from Components.FileBrowserDock import FileBrowserDock
 from Components.FileTree.FileTree import FileTree
 from Components.TextFileEditor.TextFileEditor import TextFileEditor
-from Components.AnalysisData.AnalysisData import AnalysisData
+from Components.TableDataEditor.TableDataEditor import TableDataEditor
 from Components.MusicPlayer.MusicPlayer import MusicPlayer
 from Components.Terminal.Terminal import Terminal
 from Components.TabWidget.TabWidget import TabWidget
@@ -25,13 +26,31 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.init_action()
     
     def extraUi(self):
+        # Left
+        self.toolBox_Resource = QToolBox(self.dockWidget_Left)
+        self.toolBox_Resource.setObjectName("toolBox Resource")
+
+        self.page_folder = QWidget()
+        self.page_folder.setGeometry(QRect(0, 0, 182, 623))
+        self.page_folder.setObjectName("page folder")
+
+        self.verticalLayout_page_folder = QVBoxLayout(self.page_folder)
+        self.toolBox_Resource.addItem(self.page_folder, "Folder")
+
+        self.page_info = QWidget()
+        self.page_info.setGeometry(QRect(0, 0, 182, 623))
+        self.page_info.setObjectName("page info")
+        self.verticalLayout_page_info = QVBoxLayout(self.page_info)
+        self.toolBox_Resource.addItem(self.page_info, "Info")
+        self.dockWidget_Left.setWidget(self.toolBox_Resource)
+
         # Bottom
-        self.tabWidget_Operation = TabWidget(self, "tabWidget_Operation", QTabWidget.West)
+        self.tabWidget_Operation = TabWidget(self.dockWidget_Bottom, "tabWidget_Operation", QTabWidget.West)
         self.dockWidget_Bottom.setWidget(self.tabWidget_Operation)
         self.tabWidget_Operation.show()
 
         # Right
-        self.tabWidget_Draw = TabWidget(self, "tabWidget_Draw", QTabWidget.East)
+        self.tabWidget_Draw = TabWidget(self.dockWidget_Draw, "tabWidget_Draw", QTabWidget.East)
         self.dockWidget_Draw.setWidget(self.tabWidget_Draw)
         self.tabWidget_Draw.show()
     
@@ -69,17 +88,23 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         fileEditor.show()
     
     def create_analysis_file_window(self, file_path=""):
-        analysisData = AnalysisData(file_path)
+        analysisData = TableDataEditor(file_path)
         self.workspace.addSubWindow(analysisData)
         analysisData.show()
     
     def open_folder(self):
         directory = QFileDialog.getExistingDirectory(self, "Open Folder", "./")
-        filetree = FileTree(self.dockWidget_Left, directory)
-        self.dockWidget_Left.setWidget(filetree)
+        widget_count = self.verticalLayout_page_folder.count()
+        for widget_index in range(widget_count):
+            widget = self.verticalLayout_page_folder.itemAt(widget_index).widget()
+            self.verticalLayout_page_folder.removeWidget(widget)
+            widget.deleteLater()
+
+        filetree = FileTree(self.page_folder, directory)
         filetree.fileSelected_Open.connect(self.create_text_file_window)
         filetree.fileSelected_Analysis.connect(self.create_analysis_file_window)
-        filetree.show()
+        self.verticalLayout_page_folder.addWidget(filetree)
+        
 
         # self.file_browser_dock = FileBrowserDock(self.dockWidget_Left, directory)
         # self.file_browser_dock.fileSelected.connect(self.create_text_file_window)
