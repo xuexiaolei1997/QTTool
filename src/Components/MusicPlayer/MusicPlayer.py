@@ -432,7 +432,7 @@ class MusicPlayer(Ui_MusicPlayer, QDialog):
             self.horizontalSlider_volume.setValue(settings.volume)
 
     # export accompany
-    def exportAccompany(self, fpath, method, sub_model=None):
+    def exportAccompany(self, fpath, method):
         if method not in Database.ACCOMPANY_ALGORITHM_LIST:
             return
         fpath = remove_file_prefix(fpath)
