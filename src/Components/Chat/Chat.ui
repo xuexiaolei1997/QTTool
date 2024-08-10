@@ -21,7 +21,7 @@
      </property>
      <widget class="QWidget" name="tab_Chat">
       <attribute name="title">
-       <string>Tab Chat</string>
+       <string>Chat</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
@@ -91,7 +91,7 @@
      </widget>
      <widget class="QWidget" name="tab_Setting">
       <attribute name="title">
-       <string>Tab Setting</string>
+       <string>Setting</string>
       </attribute>
      </widget>
     </widget>

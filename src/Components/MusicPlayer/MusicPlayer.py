@@ -65,7 +65,6 @@ class SperateMusicAccompanyWorker(QObject):
         self.method = method
         self.mp3_path = mp3_path
         self.output_dir = output_dir
-        self.sub_model = sub_model
 
     def run(self):
         try:
